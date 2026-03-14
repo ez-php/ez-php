@@ -86,7 +86,7 @@ When creating a new module or `CLAUDE.md` anywhere in this repository:
 
 **CLAUDE.md structure:**
 - Start with the full content of `CODING_GUIDELINES.md`, verbatim
-- Then add `---` followed by `# Package: ezphp/<name>` (or `# Directory: <name>`)
+- Then add `---` followed by `# Package: ez-php/<name>` (or `# Directory: <name>`)
 - Module-specific section must cover:
   - Source structure (file tree with one-line descriptions per file)
   - Key classes and their responsibilities
@@ -135,7 +135,7 @@ ez-php/
 ├── routes/
 │   └── web.php                 — Route definitions; $router is injected by RouterServiceProvider
 ├── .env.example                — Template for the .env file; copy to .env and fill in values
-└── composer.json               — Project composer config; requires ezphp/framework, namespace App\
+└── composer.json               — Project composer config; requires ez-php/framework, namespace App\
 ```
 
 ---
@@ -264,7 +264,7 @@ $router->group('/api', function (Router $r) {
 
 ## Language Files — `lang/`
 
-PHP array files consumed by `ezphp/i18n` `Translator`. The template ships with `en` and `de` translation files for validation error messages. Add additional locales by creating `lang/<locale>/` directories.
+PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with `en` and `de` translation files for validation error messages. Add additional locales by creating `lang/<locale>/` directories.
 
 ---
 
