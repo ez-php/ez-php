@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use EzPhp\Env\Dotenv;
+use EzPhp\Application\Application;
+use EzPhp\Console\Console;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->safeLoad();
+
+$app = new Application(__DIR__);
+$app->bootstrap();
+
+/** @var list<string> $argv */
+exit($app->make(Console::class)->run($argv));
