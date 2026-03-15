@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     default-mysql-client \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl curl
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
 # Install Redis PHP extension
 RUN pecl install redis \
