@@ -7,9 +7,9 @@ services:
       args:
         WWWUSER: 1000
         WWWGROUP: 1000
-    container_name: ez-php-app
+    container_name: ez-php-template-app
     ports:
-      - "8000:80"
+      - "${APP_PORT:-8000}:80"
     volumes:
       - .:/var/www/html
     env_file:
@@ -22,13 +22,13 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: ez-php-redis
+    container_name: ez-php-template-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
 
   db:
     image: mysql:8.4
-    container_name: ez-php-db
+    container_name: ez-php-template-db
     restart: unless-stopped
     ports:
       - "${DB_PORT:-3306}:3306"
