@@ -1,6 +1,6 @@
 {
   "name": "ez-php/ez-php",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "ez-php application template",
   "type": "project",
   "license": "MIT",
@@ -19,6 +19,7 @@
     }
   },
   "require-dev": {
+    "ez-php/testing": "0.*",
     "phpunit/phpunit": "^13.0",
     "phpstan/phpstan": "^2.1",
     "friendsofphp/php-cs-fixer": "^3.94",

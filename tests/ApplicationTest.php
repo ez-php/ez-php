@@ -6,10 +6,7 @@ namespace Tests;
 
 use App\Providers\AppServiceProvider;
 use EzPhp\Application\Application;
-use EzPhp\Exceptions\ApplicationException;
-use EzPhp\Exceptions\ContainerException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use ReflectionException;
 
 /**
  * Class ApplicationTest
@@ -19,19 +16,23 @@ use ReflectionException;
  * @package Tests
  */
 #[CoversClass(AppServiceProvider::class)]
-final class ApplicationTest extends TestCase
+final class ApplicationTest extends ApplicationTestCase
 {
     /**
-     * @throws ApplicationException
-     * @throws ContainerException
-     * @throws ReflectionException
+     * @param Application $app
+     *
+     * @return void
+     */
+    protected function configureApplication(Application $app): void
+    {
+        $app->register(AppServiceProvider::class);
+    }
+
+    /**
+     * @return void
      */
     public function test_application_bootstraps_with_app_service_provider(): void
     {
-        $app = new Application();
-        $app->register(AppServiceProvider::class);
-        $app->bootstrap();
-
-        $this->assertInstanceOf(Application::class, $app->make(Application::class));
+        $this->assertInstanceOf(Application::class, $this->app()->make(Application::class));
     }
 }
