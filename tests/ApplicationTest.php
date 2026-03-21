@@ -30,6 +30,7 @@ final class ApplicationTest extends ApplicationTestCase
 
     /**
      * @return void
+     * @throws \ReflectionException
      */
     public function test_application_bootstraps_with_app_service_provider(): void
     {
