@@ -93,6 +93,11 @@ Every module under `modules/<name>/` must have:
 | `phpunit.xml` | test suite config |
 | `.php-cs-fixer.php` | code style config |
 | `.gitignore` | ignore `vendor/`, `.env`, cache |
+| `.env.example` | environment variable defaults (copy to `.env` on first run) |
+| `docker-compose.yml` | Docker Compose service definition (always `container_name: ez-php-<name>-app`) |
+| `docker/app/Dockerfile` | module Docker image (`FROM au9500/php:8.5`) |
+| `docker/app/container-start.sh` | container entrypoint: `composer install` → `sleep infinity` |
+| `docker/app/php.ini` | PHP ini overrides (`memory_limit`, `display_errors`, `xdebug.mode`) |
 | `.github/workflows/ci.yml` | standalone CI pipeline |
 | `README.md` | public documentation |
 | `tests/TestCase.php` | base test case for the module |
@@ -140,6 +145,12 @@ After scaffolding:
 | **next free** | **3310** | **6381** |
 
 Only set a port for services the module actually uses. Modules without external services need no port config.
+
+### 4 — Monorepo scripts
+
+`packages.sh` at the project root is the **central package registry**. Both `push_all.sh` and `update_all.sh` source it — the package list lives in exactly one place.
+
+When adding a new module, add `"$ROOT/modules/<name>"` to the `PACKAGES` array in `packages.sh` in **alphabetical order** among the other `modules/*` entries (before `framework`, `ez-php`, and the root entry at the end).
 
 ---
 
@@ -342,4 +353,3 @@ PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with 
 | Application business logic | The app created from this template |
 | Tests for the template structure | Not applicable — ez-php is a template |
 | Docker configuration | `docker/` (monorepo root) |
-
