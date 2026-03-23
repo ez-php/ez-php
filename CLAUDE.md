@@ -171,9 +171,10 @@ ez-php/
 ├── ez                          — CLI entry point: loads .env, boots Application, runs Console
 ├── app/
 │   ├── Controllers/.gitkeep    — Application controllers go here (namespace: App\Controllers)
+│   ├── Entities/.gitkeep       — Data Mapper entity classes go here (namespace: App\Entities)
 │   ├── Middleware/.gitkeep     — Application middleware go here (namespace: App\Middleware)
-│   ├── Models/.gitkeep         — ORM model classes go here (namespace: App\Models)
-│   └── Providers/.gitkeep      — Application service providers go here (namespace: App\Providers)
+│   ├── Providers/.gitkeep      — Application service providers go here (namespace: App\Providers)
+│   └── Repositories/.gitkeep  — Repository classes go here (namespace: App\Repositories)
 ├── config/
 │   ├── app.php                 — App name, debug flag, locale settings (env-backed)
 │   ├── db.php                  — Database connection (env-backed)
@@ -327,7 +328,7 @@ PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with 
 - **`basePath` is the application root** — both `public/index.php` and `ez` pass the application root as `basePath`. All framework path helpers (`$app->basePath('config')`, `basePath('lang')`, etc.) resolve relative to this directory.
 - **`safeLoad()` not `load()`** — the application must start without a `.env` file when variables are injected via the real environment (Docker env vars, CI/CD secrets). `load()` would throw if the file is missing.
 - **`provider/core.php` vs `provider/modules.php`** — Core providers are always loaded and always in the same order (managed by the framework). Module providers are opt-in. This separation makes it clear what is mandatory and what is optional.
-- **`app/` namespace is `App\`** — PSR-4 autoloading maps `App\` to `app/`. Controllers live in `App\Controllers`, models in `App\Models`, etc. Do not change the namespace without updating `composer.json`.
+- **`app/` namespace is `App\`** — PSR-4 autoloading maps `App\` to `app/`. Controllers live in `App\Controllers`, entities in `App\Entities`, repositories in `App\Repositories`, etc. Do not change the namespace without updating `composer.json`.
 - **No tests in the template** — This is a project template, not a library. Tests belong in the application that is created from it.
 - **`.gitkeep` files** — Empty directories cannot be tracked by git. The `.gitkeep` files ensure the directory structure is preserved when the template is committed or distributed.
 
