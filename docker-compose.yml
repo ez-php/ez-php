@@ -26,6 +26,13 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ez-php-template-mailpit
+    ports:
+      - "${MAIL_WEB_PORT:-8025}:8025"
+      - "${MAIL_PORT:-1025}:1025"
+
   db:
     image: mysql:8.4
     container_name: ez-php-template-db
