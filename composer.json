@@ -6,7 +6,7 @@
   "license": "MIT",
   "require": {
     "php": "^8.5",
-    "ez-php/framework": "^1.0"
+    "ez-php/framework": "*"
   },
   "autoload": {
     "psr-4": {
@@ -19,7 +19,7 @@
     }
   },
   "require-dev": {
-    "ez-php/testing-application": "^1.0",
+    "ez-php/testing-application": "*",
     "phpunit/phpunit": "^13.0",
     "phpstan/phpstan": "^2.1",
     "friendsofphp/php-cs-fixer": "^3.94",
