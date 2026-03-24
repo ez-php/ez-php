@@ -1,12 +1,12 @@
 {
   "name": "ez-php/ez-php",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "description": "ez-php application template",
   "type": "project",
   "license": "MIT",
   "require": {
     "php": "^8.5",
-    "ez-php/framework": "0.*"
+    "ez-php/framework": "^1.0"
   },
   "autoload": {
     "psr-4": {
@@ -19,7 +19,7 @@
     }
   },
   "require-dev": {
-    "ez-php/testing-application": "0.*",
+    "ez-php/testing-application": "^1.0",
     "phpunit/phpunit": "^13.0",
     "phpstan/phpstan": "^2.1",
     "friendsofphp/php-cs-fixer": "^3.94",
