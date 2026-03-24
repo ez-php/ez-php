@@ -177,8 +177,14 @@ ez-php/
 │   └── Repositories/.gitkeep  — Repository classes go here (namespace: App\Repositories)
 ├── config/
 │   ├── app.php                 — App name, debug flag, locale settings (env-backed)
+│   ├── broadcast.php           — Broadcast driver and log path (env-backed)
+│   ├── cache.php               — Cache driver and connection (env-backed)
 │   ├── db.php                  — Database connection (env-backed)
-│   └── cache.php               — Cache driver and connection (env-backed)
+│   ├── mail.php                — Mail driver, SMTP connection, sender defaults (env-backed)
+│   ├── queue.php               — Queue driver and Redis connection (env-backed)
+│   ├── rate_limiter.php        — Rate limiter driver and Redis connection (env-backed)
+│   ├── search.php              — Search driver, Meilisearch/Elasticsearch connection (env-backed)
+│   └── view.php                — View template path (env-backed)
 ├── database/
 │   └── migrations/.gitkeep     — Migration files go here (loaded by Migrator)
 ├── lang/
@@ -264,6 +270,62 @@ All config files return a plain PHP array. Values are read from the environment 
 | `redis.host` | `CACHE_REDIS_HOST` | `'127.0.0.1'` |
 | `redis.port` | `CACHE_REDIS_PORT` | `6379` |
 | `redis.database` | `CACHE_REDIS_DB` | `0` |
+
+### `config/mail.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `MAIL_DRIVER` | `'null'` |
+| `host` | `MAIL_HOST` | `'127.0.0.1'` |
+| `port` | `MAIL_PORT` | `1025` |
+| `username` | `MAIL_USERNAME` | `''` |
+| `password` | `MAIL_PASSWORD` | `''` |
+| `encryption` | `MAIL_ENCRYPTION` | `'none'` |
+| `from_address` | `MAIL_FROM_ADDRESS` | `''` |
+| `from_name` | `MAIL_FROM_NAME` | `''` |
+| `log_path` | `MAIL_LOG_PATH` | `''` |
+
+### `config/queue.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `QUEUE_DRIVER` | `'database'` |
+| `redis.host` | `QUEUE_REDIS_HOST` | `'127.0.0.1'` |
+| `redis.port` | `QUEUE_REDIS_PORT` | `6379` |
+| `redis.database` | `QUEUE_REDIS_DB` | `0` |
+
+### `config/rate_limiter.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `RATE_LIMITER_DRIVER` | `'array'` |
+| `redis.host` | `RATE_LIMITER_REDIS_HOST` | `'127.0.0.1'` |
+| `redis.port` | `RATE_LIMITER_REDIS_PORT` | `6379` |
+| `redis.database` | `RATE_LIMITER_REDIS_DB` | `0` |
+
+### `config/view.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `path` | `VIEW_PATH` | `'resources/views'` |
+
+### `config/broadcast.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `BROADCAST_DRIVER` | `'null'` |
+| `log_path` | `BROADCAST_LOG_PATH` | `''` |
+
+### `config/search.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `SEARCH_DRIVER` | `'null'` |
+| `meilisearch.host` | `MEILISEARCH_HOST` | `'http://meilisearch:7700'` |
+| `meilisearch.key` | `MEILISEARCH_KEY` | `''` |
+| `elasticsearch.host` | `ELASTICSEARCH_HOST` | `'http://elasticsearch:9200'` |
+| `elasticsearch.user` | `ELASTICSEARCH_USER` | `''` |
+| `elasticsearch.password` | `ELASTICSEARCH_PASSWORD` | `''` |
 
 ---
 

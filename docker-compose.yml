@@ -33,6 +33,17 @@ services:
       - "${MAIL_WEB_PORT:-8025}:8025"
       - "${MAIL_PORT:-1025}:1025"
 
+  # meilisearch:
+  #   image: getmeili/meilisearch:v1.13
+  #   container_name: ez-php-template-meilisearch
+  #   ports:
+  #     - "${MEILISEARCH_PORT:-7700}:7700"
+  #   environment:
+  #     MEILI_MASTER_KEY: "${MEILISEARCH_KEY:-}"
+  #     MEILI_NO_ANALYTICS: "true"
+  #   tmpfs:
+  #     - /meili_data
+
   db:
     image: mysql:8.4
     container_name: ez-php-template-db
