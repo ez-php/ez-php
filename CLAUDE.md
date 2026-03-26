@@ -142,7 +142,9 @@ After scaffolding:
 | `ez-php/framework` | 3307 | — |
 | `ez-php/orm` | 3309 | — |
 | `ez-php/cache` | — | 6380 |
-| **next free** | **3310** | **6381** |
+| `ez-php/queue` | 3310 | 6381 |
+| `ez-php/rate-limiter` | — | 6382 |
+| **next free** | **3311** | **6383** |
 
 Only set a port for services the module actually uses. Modules without external services need no port config.
 
