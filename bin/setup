@@ -1,0 +1,245 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Interactive ez-php module installer.
+ *
+ * Runs automatically after `composer create-project ez-php/ez-php <dir>` via
+ * the post-create-project-cmd Composer hook, or manually with `php bin/setup`.
+ *
+ * What it does:
+ *   1. Presents a numbered list of optional ez-php modules.
+ *   2. Asks the user which ones to install (comma-separated numbers or "all"/"none").
+ *   3. Runs `composer require ez-php/<module>` for each selected module.
+ *   4. Uncomments the corresponding service provider lines in provider/modules.php.
+ */
+
+// ── Module registry ────────────────────────────────────────────────────────
+
+/**
+ * @var array<string, array{desc: string, providers: list<string>}>
+ */
+const MODULES = [
+    'auth'         => [
+        'desc'      => 'Session and Bearer token authentication',
+        'providers' => ['EzPhp\\Auth\\AuthServiceProvider'],
+    ],
+    'broadcast'    => [
+        'desc'      => 'WebSocket / SSE event broadcasting',
+        'providers' => ['EzPhp\\Broadcast\\BroadcastServiceProvider'],
+    ],
+    'cache'        => [
+        'desc'      => 'Array, File, and Redis cache drivers',
+        'providers' => ['EzPhp\\Cache\\CacheServiceProvider'],
+    ],
+    'events'       => [
+        'desc'      => 'Synchronous in-process event bus',
+        'providers' => ['EzPhp\\Events\\EventServiceProvider'],
+    ],
+    'http-client'  => [
+        'desc'      => 'Fluent cURL HTTP client',
+        'providers' => ['EzPhp\\HttpClient\\HttpClientServiceProvider'],
+    ],
+    'i18n'         => [
+        'desc'      => 'Locale-based translator with dot-notation keys',
+        'providers' => ['EzPhp\\I18n\\TranslatorServiceProvider'],
+    ],
+    'logging'      => [
+        'desc'      => 'File, Stdout, and Null log drivers',
+        'providers' => ['EzPhp\\Logging\\LogServiceProvider'],
+    ],
+    'mail'         => [
+        'desc'      => 'SMTP and log mail drivers',
+        'providers' => ['EzPhp\\Mail\\MailServiceProvider'],
+    ],
+    'orm'          => [
+        'desc'      => 'Active Record ORM, Query Builder, Schema Builder',
+        'providers' => [
+            'EzPhp\\Orm\\EntityServiceProvider',
+            'EzPhp\\Orm\\Schema\\SchemaServiceProvider',
+        ],
+    ],
+    'queue'        => [
+        'desc'      => 'Async job queue — database and Redis drivers',
+        'providers' => ['EzPhp\\Queue\\QueueServiceProvider'],
+    ],
+    'rate-limiter' => [
+        'desc'      => 'Request rate limiting with ThrottleMiddleware',
+        'providers' => ['EzPhp\\RateLimiter\\RateLimiterServiceProvider'],
+    ],
+    'search'       => [
+        'desc'      => 'Search index driver (Meilisearch / Elasticsearch)',
+        'providers' => ['EzPhp\\Search\\SearchServiceProvider'],
+    ],
+    'validation'   => [
+        'desc'      => 'Rule-based input validation',
+        'providers' => ['EzPhp\\Validation\\ValidationServiceProvider'],
+    ],
+    'view'         => [
+        'desc'      => 'PHP template engine',
+        'providers' => ['EzPhp\\View\\ViewServiceProvider'],
+    ],
+];
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * @param string $text
+ * @param string $color ANSI color code, e.g. '32' for green.
+ *
+ * @return string
+ */
+function colored(string $text, string $color): string
+{
+    return "\033[{$color}m{$text}\033[0m";
+}
+
+function printBanner(): void
+{
+    echo "\n";
+    echo colored('  ┌─────────────────────────────┐', '36') . "\n";
+    echo colored('  │   ez-php module installer   │', '36') . "\n";
+    echo colored('  └─────────────────────────────┘', '36') . "\n";
+    echo "\n";
+}
+
+/**
+ * @return list<string>
+ */
+function moduleKeys(): array
+{
+    return array_keys(MODULES);
+}
+
+function printModuleList(): void
+{
+    $keys = moduleKeys();
+
+    foreach ($keys as $i => $key) {
+        $num  = colored((string) ($i + 1), '33');
+        $name = colored($key, '32');
+        $desc = MODULES[$key]['desc'];
+        echo "  [{$num}] {$name} — {$desc}\n";
+    }
+
+    echo "\n";
+}
+
+/**
+ * @return list<string> Selected module keys.
+ */
+function promptSelection(): array
+{
+    $keys  = moduleKeys();
+    $count = count($keys);
+
+    echo colored("Which modules do you want to install?", '1') . "\n";
+    echo "  Enter numbers separated by commas, or " . colored('all', '32') . " / " . colored('none', '31') . ":\n";
+    echo "  > ";
+
+    $line = trim((string) fgets(STDIN));
+
+    if ($line === '' || strtolower($line) === 'none') {
+        return [];
+    }
+
+    if (strtolower($line) === 'all') {
+        return $keys;
+    }
+
+    $selected = [];
+
+    foreach (explode(',', $line) as $token) {
+        $token = trim($token);
+
+        if (!ctype_digit($token)) {
+            continue;
+        }
+
+        $index = (int) $token - 1;
+
+        if ($index >= 0 && $index < $count) {
+            $selected[] = $keys[$index];
+        }
+    }
+
+    return array_unique($selected);
+}
+
+/**
+ * @param list<string> $modules Selected module keys.
+ *
+ * @return bool True on success.
+ */
+function installModules(array $modules): bool
+{
+    foreach ($modules as $key) {
+        $package = 'ez-php/' . $key;
+
+        echo "\n" . colored("→ Installing {$package} ...", '36') . "\n";
+
+        passthru('composer require ' . escapeshellarg($package), $code);
+
+        if ($code !== 0) {
+            fwrite(STDERR, colored("  [error] composer require {$package} failed (exit {$code}).\n", '31'));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Uncomment one or more service provider lines in provider/modules.php.
+ *
+ * @param list<string> $modules
+ * @param string       $modulesFile Absolute path to provider/modules.php.
+ *
+ * @return void
+ */
+function activateProviders(array $modules, string $modulesFile): void
+{
+    if (!is_file($modulesFile)) {
+        return;
+    }
+
+    $content = (string) file_get_contents($modulesFile);
+
+    foreach ($modules as $key) {
+        foreach (MODULES[$key]['providers'] as $fqcn) {
+            $commented   = '    // ' . $fqcn . '::class,';
+            $uncommented = '    ' . $fqcn . '::class,';
+            $content     = str_replace($commented, $uncommented, $content);
+        }
+    }
+
+    file_put_contents($modulesFile, $content);
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────
+
+printBanner();
+printModuleList();
+
+$selected = promptSelection();
+
+if ($selected === []) {
+    echo "\n" . colored('No modules selected. You can install them later with `composer require ez-php/<module>`.', '33') . "\n\n";
+    exit(0);
+}
+
+echo "\n" . colored('Selected: ', '1') . implode(', ', $selected) . "\n";
+
+if (!installModules($selected)) {
+    exit(1);
+}
+
+$root = dirname(__DIR__);
+activateProviders($selected, $root . '/provider/modules.php');
+
+echo "\n" . colored('Done! Selected modules are installed and their providers have been activated.', '32') . "\n";
+echo colored('Run `php ez migrate` if the installed modules require database tables.', '33') . "\n\n";
+
+exit(0);
