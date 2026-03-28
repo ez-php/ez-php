@@ -40,6 +40,10 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch |
 | Validation | `ez-php/validation` | Rule-based input validation |
 | View | `ez-php/view` | PHP template engine, layouts, sections |
+| Notification | `ez-php/notification` | Multi-channel notifications (mail, broadcast, database) |
+| Storage | `ez-php/storage` | File storage abstraction, Local and S3 drivers |
+| Health | `ez-php/health` | `/health` endpoint with DB, Redis, and Queue probes |
+| Feature Flags | `ez-php/feature-flags` | Feature flag evaluation, File/Database/Array drivers |
 
 Example:
 

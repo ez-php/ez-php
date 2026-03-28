@@ -6,6 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v1.1.0] — 2026-03-28
+
+### Added
+- `bin/setup` — interactive project installer; runs via `post-create-project-cmd` after `composer create-project`; presents a numbered list of optional modules, runs `composer require` for selected packages, and auto-uncomments providers in `provider/modules.php`
+- `lang/fr/validation.php`, `lang/es/validation.php`, `lang/it/validation.php`, `lang/pt/validation.php`, `lang/nl/validation.php`, `lang/pl/validation.php` — validation error message translations for French, Spanish, Italian, Portuguese, Dutch, and Polish
+
+### Changed
+- `provider/modules.php` — added commented-out entries for `ez-php/notification`, `ez-php/storage`, `ez-php/health`, and `ez-php/feature-flags`
+
+---
+
 ## [v1.0.1] — 2026-03-25
 
 ### Changed

@@ -70,6 +70,22 @@ return [
     // Requires: composer require ez-php/view
     // EzPhp\View\ViewServiceProvider::class,
 
+    // ─── Notification ────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/notification
+    // EzPhp\Notification\NotificationServiceProvider::class,
+
+    // ─── Storage ─────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/storage
+    // EzPhp\Storage\StorageServiceProvider::class,
+
+    // ─── Health ──────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/health
+    // EzPhp\Health\HealthServiceProvider::class,
+
+    // ─── Feature Flags ───────────────────────────────────────────────────────
+    // Requires: composer require ez-php/feature-flags
+    // EzPhp\FeatureFlags\FeatureFlagServiceProvider::class,
+
     // ─── Application providers ────────────────────────────────────────────────
     // App\Providers\AppServiceProvider::class,
 ];
