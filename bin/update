@@ -6,25 +6,26 @@ declare(strict_types=1);
 /**
  * ez-php template updater.
  *
- * Applies changes from an updated template directory to an existing project.
+ * Applies changes from an updated template to an existing project.
+ * Without --source the template is cloned from GitHub into a temp directory
+ * and removed automatically when the script exits.
  *
  * Usage:
- *   php bin/update --source=<path>  [--dry-run] [--yes]
- *
- * Options:
- *   --source=<path>   Path to the ez-php template directory (required).
- *   --dry-run         Print what would change without writing any files.
- *   --yes             Apply all PROMPT-category changes without asking.
+ *   php bin/update                          — clone from GitHub, update
+ *   php bin/update --branch=main            — clone a specific branch (default: main)
+ *   php bin/update --source=<path>          — use a local template directory
+ *   php bin/update --dry-run                — show what would change, write nothing
+ *   php bin/update --yes                    — apply PROMPT files without asking
  *
  * File categories:
- *   AUTO    Framework-owned files that are always safe to overwrite.
- *           Applied automatically when the content has changed.
- *   PROMPT  Shared files the user may have customised.
- *           A diff summary is shown and you are asked to confirm each one.
+ *   AUTO    Framework-owned files, always safe to overwrite.
+ *   PROMPT  Shared files the user may have customised; diff shown, confirmation asked.
  *   SKIP    User-owned files — never touched.
  */
 
-// ── File registry ──────────────────────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────────────────────────
+
+const TEMPLATE_REPO = 'https://github.com/ez-php/ez-php.git';
 
 /**
  * Files that belong to the framework and must not be edited by users.
@@ -123,7 +124,7 @@ function err(string $text): void
 }
 
 /**
- * Return a short diff summary: "+N -M lines" between two file contents.
+ * Return a short diff summary: "+N -M lines" between two strings.
  */
 function diffSummary(string $old, string $new): string
 {
@@ -137,21 +138,7 @@ function diffSummary(string $old, string $new): string
 }
 
 /**
- * Show a unified diff if the `diff` binary is available; fall back to summary.
- */
-function showDiff(string $projectFile, string $sourceFile): void
-{
-    if (PHP_OS_FAMILY !== 'Windows' && shell_exec('which diff 2>/dev/null') !== null) {
-        passthru('diff -u ' . escapeshellarg($projectFile) . ' ' . escapeshellarg($sourceFile));
-    } else {
-        $old = (string) file_get_contents($projectFile);
-        $new = (string) file_get_contents($sourceFile);
-        echo diffSummary($old, $new) . "\n";
-    }
-}
-
-/**
- * Copy a file from source to project, creating parent directories if needed.
+ * Copy a file from source to dest, creating parent directories if needed.
  */
 function copyFile(string $from, string $to): void
 {
@@ -165,8 +152,29 @@ function copyFile(string $from, string $to): void
 }
 
 /**
- * Ask a yes/no question and return the answer.
- * Returns $default when running non-interactively.
+ * Recursively delete a directory.
+ */
+function removeDir(string $path): void
+{
+    if (!is_dir($path)) {
+        return;
+    }
+
+    $items = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST,
+    );
+
+    foreach ($items as $item) {
+        /** @var SplFileInfo $item */
+        $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+    }
+
+    rmdir($path);
+}
+
+/**
+ * Ask a yes/no question on STDIN. Returns $default in non-interactive mode.
  */
 function confirm(string $question, bool $default = false): bool
 {
@@ -192,17 +200,20 @@ function confirm(string $question, bool $default = false): bool
 /**
  * @param list<string> $argv
  *
- * @return array{source: string, dryRun: bool, yes: bool}
+ * @return array{source: string, branch: string, dryRun: bool, yes: bool}
  */
 function parseArgs(array $argv): array
 {
     $source = '';
+    $branch = 'main';
     $dryRun = false;
     $yes    = false;
 
     foreach (array_slice($argv, 1) as $arg) {
         if (str_starts_with($arg, '--source=')) {
             $source = substr($arg, strlen('--source='));
+        } elseif (str_starts_with($arg, '--branch=')) {
+            $branch = substr($arg, strlen('--branch='));
         } elseif ($arg === '--dry-run') {
             $dryRun = true;
         } elseif ($arg === '--yes' || $arg === '-y') {
@@ -210,10 +221,55 @@ function parseArgs(array $argv): array
         }
     }
 
-    return ['source' => $source, 'dryRun' => $dryRun, 'yes' => $yes];
+    return ['source' => $source, 'branch' => $branch, 'dryRun' => $dryRun, 'yes' => $yes];
 }
 
-// ── Core logic ─────────────────────────────────────────────────────────────────
+// ── Git clone ──────────────────────────────────────────────────────────────────
+
+/**
+ * Clone the template repository into a temp directory.
+ * Registers a shutdown function to delete it afterwards.
+ *
+ * @return string  Path to the cloned directory.
+ */
+function cloneTemplate(string $branch): string
+{
+    // Verify git is available.
+    exec('git --version 2>/dev/null', $out, $code);
+
+    if ($code !== 0) {
+        err('git is not available. Install git or use --source=<path>.');
+        exit(1);
+    }
+
+    $tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ez-php-update-' . uniqid();
+
+    echo c('  Cloning ', '90') . TEMPLATE_REPO . c(" ({$branch}) ...", '90') . "\n";
+
+    $cmd  = 'git clone --depth=1 --branch ' . escapeshellarg($branch)
+        . ' ' . escapeshellarg(TEMPLATE_REPO)
+        . ' ' . escapeshellarg($tmpDir)
+        . ' 2>&1';
+
+    exec($cmd, $output, $exitCode);
+
+    if ($exitCode !== 0) {
+        err('Clone failed:');
+        foreach ($output as $line) {
+            echo "    {$line}\n";
+        }
+        exit(1);
+    }
+
+    // Clean up on exit, regardless of how the script terminates.
+    register_shutdown_function(static function () use ($tmpDir): void {
+        removeDir($tmpDir);
+    });
+
+    return $tmpDir;
+}
+
+// ── File processing ────────────────────────────────────────────────────────────
 
 /**
  * @return array{applied: list<string>, skipped: list<string>, unchanged: int}
@@ -251,7 +307,6 @@ function processFiles(
         $label = $isNew ? c('new', '32') : diffSummary($destContent ?? '', $srcContent);
 
         if ($autoOnly) {
-            // AUTO: apply without asking.
             if (!$dryRun) {
                 copyFile($src, $dest);
             }
@@ -260,7 +315,6 @@ function processFiles(
             success($prefix . c($rel, '1') . "  {$label}");
             $applied[] = $rel;
         } else {
-            // PROMPT: show summary, ask.
             echo "\n";
             echo '  ' . c($rel, '1') . "  {$label}\n";
 
@@ -295,26 +349,28 @@ echo c('  │   ez-php template updater   │', '36') . "\n";
 echo c('  └──────────────────────────────┘', '36') . "\n";
 echo "\n";
 
-if ($args['source'] === '') {
-    err('--source=<path> is required.');
-    echo "\n  " . c('Usage:', '1') . " php bin/update --source=<template-dir> [--dry-run] [--yes]\n\n";
-    exit(1);
-}
-
-$sourceRoot  = rtrim(realpath($args['source']) ?: $args['source'], DIRECTORY_SEPARATOR);
 $projectRoot = rtrim(realpath(dirname(__DIR__)) ?: dirname(__DIR__), DIRECTORY_SEPARATOR);
 
-if (!is_dir($sourceRoot)) {
-    err("Source directory not found: {$sourceRoot}");
-    exit(1);
+// Resolve source: clone from GitHub if --source was not provided.
+if ($args['source'] === '') {
+    $sourceRoot = cloneTemplate($args['branch']);
+    echo "\n";
+} else {
+    $sourceRoot = rtrim(realpath($args['source']) ?: $args['source'], DIRECTORY_SEPARATOR);
+
+    if (!is_dir($sourceRoot)) {
+        err("Source directory not found: {$sourceRoot}");
+        exit(1);
+    }
+
+    if ($sourceRoot === $projectRoot) {
+        err('Source and project directories are the same. Aborting.');
+        exit(1);
+    }
+
+    echo c('  Source:  ', '90') . $sourceRoot . "\n";
 }
 
-if ($sourceRoot === $projectRoot) {
-    err('Source and project directories are the same. Aborting.');
-    exit(1);
-}
-
-echo c('  Source:  ', '90') . $sourceRoot . "\n";
 echo c('  Project: ', '90') . $projectRoot . "\n";
 
 if ($args['dryRun']) {
@@ -333,7 +389,7 @@ if ($autoResult['applied'] === [] && $autoResult['unchanged'] > 0) {
     skip("All {$autoResult['unchanged']} framework-owned files are up to date.");
 }
 
-// ── PROMPT files ─────────────────────────────────────────────────────────────
+// ── PROMPT files ──────────────────────────────────────────────────────────────
 
 echo "\n";
 info('── Shared files (review and apply) ──────────────────────────────────────');
@@ -347,8 +403,8 @@ if ($promptResult['applied'] === [] && $promptResult['skipped'] === [] && $promp
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 
-$totalApplied  = count($autoResult['applied']) + count($promptResult['applied']);
-$totalSkipped  = count($promptResult['skipped']);
+$totalApplied   = count($autoResult['applied']) + count($promptResult['applied']);
+$totalSkipped   = count($promptResult['skipped']);
 $totalUnchanged = $autoResult['unchanged'] + $promptResult['unchanged'];
 
 echo "\n";
@@ -356,7 +412,7 @@ info('── Summary ───────────────────�
 echo "\n";
 
 if ($totalApplied > 0) {
-    echo '  ' . c((string) $totalApplied, '32') . " file(s) " . ($args['dryRun'] ? 'would be ' : '') . "updated\n";
+    echo '  ' . c((string) $totalApplied, '32') . ' file(s) ' . ($args['dryRun'] ? 'would be ' : '') . "updated\n";
 }
 
 if ($totalSkipped > 0) {
@@ -374,12 +430,7 @@ if ($totalApplied > 0 && !$args['dryRun']) {
         warn('composer.json was updated — run: composer update');
     }
 
-    if (
-        in_array('database/migrations/.gitkeep', $autoResult['applied'], true)
-        || $totalApplied > 0
-    ) {
-        warn('Run php ez db:setup to apply any new migrations and seeders.');
-    }
+    warn('Run php ez db:setup to apply any new migrations and seeders.');
 }
 
 echo "\n";
