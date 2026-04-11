@@ -87,5 +87,9 @@ return [
     // EzPhp\FeatureFlags\FeatureFlagServiceProvider::class,
 
     // ─── Application providers ────────────────────────────────────────────────
-    // App\Providers\AppServiceProvider::class,
+    // Split AppServiceProvider by domain — uncomment the providers you need:
+    App\Providers\AuthServiceProvider::class,
+    App\Providers\HeroServiceProvider::class,
+    App\Providers\SkillServiceProvider::class,
+    App\Providers\BattleServiceProvider::class,
 ];
