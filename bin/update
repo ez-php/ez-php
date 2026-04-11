@@ -1,0 +1,386 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * ez-php template updater.
+ *
+ * Applies changes from an updated template directory to an existing project.
+ *
+ * Usage:
+ *   php bin/update --source=<path>  [--dry-run] [--yes]
+ *
+ * Options:
+ *   --source=<path>   Path to the ez-php template directory (required).
+ *   --dry-run         Print what would change without writing any files.
+ *   --yes             Apply all PROMPT-category changes without asking.
+ *
+ * File categories:
+ *   AUTO    Framework-owned files that are always safe to overwrite.
+ *           Applied automatically when the content has changed.
+ *   PROMPT  Shared files the user may have customised.
+ *           A diff summary is shown and you are asked to confirm each one.
+ *   SKIP    User-owned files — never touched.
+ */
+
+// ── File registry ──────────────────────────────────────────────────────────────
+
+/**
+ * Files that belong to the framework and must not be edited by users.
+ * Applied automatically when their content differs from the template.
+ *
+ * @var list<string>
+ */
+const AUTO_FILES = [
+    'public/index.php',
+    'ez',
+    'tests/bootstrap.php',
+    'tests/ApplicationTestCase.php',
+    'tests/TestCase.php',
+    'provider/core.php',
+    'bin/setup',
+    'bin/update',
+];
+
+/**
+ * Files the user may have customised but that also receive upstream changes.
+ * A diff summary is shown and you are asked whether to apply each change.
+ *
+ * @var list<string>
+ */
+const PROMPT_FILES = [
+    'phpunit.xml',
+    'phpstan.neon',
+    '.php-cs-fixer.php',
+    '.gitignore',
+    '.gitattributes',
+    '.env.example',
+    'composer.json',
+    'docker-compose.yml',
+    'docker/app/Dockerfile',
+    'docker/app/container-start.sh',
+    'docker/app/nginx.conf',
+    'docker/app/php.ini',
+    'docker/app/supervisord.conf',
+    'docker/db/create-db.sh',
+    '.github/workflows/ci.yml',
+    'docs/CONFIG.md',
+    'docs/getting-started.md',
+    'docs/testing-guide.md',
+    'lang/de/validation.php',
+    'lang/en/validation.php',
+    'lang/es/validation.php',
+    'lang/fr/validation.php',
+    'lang/it/validation.php',
+    'lang/nl/validation.php',
+    'lang/pl/validation.php',
+    'lang/pt/validation.php',
+    'config/app.php',
+    'config/broadcast.php',
+    'config/cache.php',
+    'config/db.php',
+    'config/flags.php',
+    'config/health.php',
+    'config/mail.php',
+    'config/queue.php',
+    'config/rate_limiter.php',
+    'config/search.php',
+    'config/storage.php',
+    'config/view.php',
+];
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function c(string $text, string $code): string
+{
+    return "\033[{$code}m{$text}\033[0m";
+}
+
+function info(string $text): void
+{
+    echo c($text, '36') . "\n";
+}
+
+function success(string $text): void
+{
+    echo c('  ✓ ', '32') . $text . "\n";
+}
+
+function skip(string $text): void
+{
+    echo c('  – ', '90') . c($text, '90') . "\n";
+}
+
+function warn(string $text): void
+{
+    echo c('  ! ', '33') . $text . "\n";
+}
+
+function err(string $text): void
+{
+    fwrite(STDERR, c('  ✗ ' . $text, '31') . "\n");
+}
+
+/**
+ * Return a short diff summary: "+N -M lines" between two file contents.
+ */
+function diffSummary(string $old, string $new): string
+{
+    $oldLines = explode("\n", $old);
+    $newLines = explode("\n", $new);
+
+    $added   = count(array_diff($newLines, $oldLines));
+    $removed = count(array_diff($oldLines, $newLines));
+
+    return c("+{$added}", '32') . ' ' . c("-{$removed}", '31') . ' lines';
+}
+
+/**
+ * Show a unified diff if the `diff` binary is available; fall back to summary.
+ */
+function showDiff(string $projectFile, string $sourceFile): void
+{
+    if (PHP_OS_FAMILY !== 'Windows' && shell_exec('which diff 2>/dev/null') !== null) {
+        passthru('diff -u ' . escapeshellarg($projectFile) . ' ' . escapeshellarg($sourceFile));
+    } else {
+        $old = (string) file_get_contents($projectFile);
+        $new = (string) file_get_contents($sourceFile);
+        echo diffSummary($old, $new) . "\n";
+    }
+}
+
+/**
+ * Copy a file from source to project, creating parent directories if needed.
+ */
+function copyFile(string $from, string $to): void
+{
+    $dir = dirname($to);
+
+    if (!is_dir($dir)) {
+        mkdir($dir, 0o755, true);
+    }
+
+    copy($from, $to);
+}
+
+/**
+ * Ask a yes/no question and return the answer.
+ * Returns $default when running non-interactively.
+ */
+function confirm(string $question, bool $default = false): bool
+{
+    $hint = $default ? '[Y/n]' : '[y/N]';
+    echo "     {$question} {$hint} ";
+
+    if (!stream_isatty(STDIN)) {
+        echo "\n";
+        return $default;
+    }
+
+    $line = strtolower(trim((string) fgets(STDIN)));
+
+    if ($line === '') {
+        return $default;
+    }
+
+    return $line === 'y' || $line === 'yes';
+}
+
+// ── Argument parsing ───────────────────────────────────────────────────────────
+
+/**
+ * @param list<string> $argv
+ *
+ * @return array{source: string, dryRun: bool, yes: bool}
+ */
+function parseArgs(array $argv): array
+{
+    $source = '';
+    $dryRun = false;
+    $yes    = false;
+
+    foreach (array_slice($argv, 1) as $arg) {
+        if (str_starts_with($arg, '--source=')) {
+            $source = substr($arg, strlen('--source='));
+        } elseif ($arg === '--dry-run') {
+            $dryRun = true;
+        } elseif ($arg === '--yes' || $arg === '-y') {
+            $yes = true;
+        }
+    }
+
+    return ['source' => $source, 'dryRun' => $dryRun, 'yes' => $yes];
+}
+
+// ── Core logic ─────────────────────────────────────────────────────────────────
+
+/**
+ * @return array{applied: list<string>, skipped: list<string>, unchanged: int}
+ */
+function processFiles(
+    string $projectRoot,
+    string $sourceRoot,
+    bool $dryRun,
+    bool $yes,
+    bool $autoOnly,
+): array {
+    $applied   = [];
+    $skipped   = [];
+    $unchanged = 0;
+
+    $files = $autoOnly ? AUTO_FILES : PROMPT_FILES;
+
+    foreach ($files as $rel) {
+        $src  = $sourceRoot . DIRECTORY_SEPARATOR . $rel;
+        $dest = $projectRoot . DIRECTORY_SEPARATOR . $rel;
+
+        if (!file_exists($src)) {
+            continue;
+        }
+
+        $srcContent  = (string) file_get_contents($src);
+        $destContent = file_exists($dest) ? (string) file_get_contents($dest) : null;
+
+        if ($destContent === $srcContent) {
+            $unchanged++;
+            continue;
+        }
+
+        $isNew = $destContent === null;
+        $label = $isNew ? c('new', '32') : diffSummary($destContent ?? '', $srcContent);
+
+        if ($autoOnly) {
+            // AUTO: apply without asking.
+            if (!$dryRun) {
+                copyFile($src, $dest);
+            }
+
+            $prefix = $dryRun ? c('[dry-run] ', '33') : '';
+            success($prefix . c($rel, '1') . "  {$label}");
+            $applied[] = $rel;
+        } else {
+            // PROMPT: show summary, ask.
+            echo "\n";
+            echo '  ' . c($rel, '1') . "  {$label}\n";
+
+            $apply = $yes || confirm('Apply this update?');
+
+            if ($apply) {
+                if (!$dryRun) {
+                    copyFile($src, $dest);
+                }
+
+                $prefix = $dryRun ? c('[dry-run] ', '33') : '';
+                success($prefix . 'Applied ' . c($rel, '1'));
+                $applied[] = $rel;
+            } else {
+                skip("Skipped {$rel}");
+                $skipped[] = $rel;
+            }
+        }
+    }
+
+    return ['applied' => $applied, 'skipped' => $skipped, 'unchanged' => $unchanged];
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────────
+
+/** @var list<string> $argv */
+$args = parseArgs($argv);
+
+echo "\n";
+echo c('  ┌──────────────────────────────┐', '36') . "\n";
+echo c('  │   ez-php template updater   │', '36') . "\n";
+echo c('  └──────────────────────────────┘', '36') . "\n";
+echo "\n";
+
+if ($args['source'] === '') {
+    err('--source=<path> is required.');
+    echo "\n  " . c('Usage:', '1') . " php bin/update --source=<template-dir> [--dry-run] [--yes]\n\n";
+    exit(1);
+}
+
+$sourceRoot  = rtrim(realpath($args['source']) ?: $args['source'], DIRECTORY_SEPARATOR);
+$projectRoot = rtrim(realpath(dirname(__DIR__)) ?: dirname(__DIR__), DIRECTORY_SEPARATOR);
+
+if (!is_dir($sourceRoot)) {
+    err("Source directory not found: {$sourceRoot}");
+    exit(1);
+}
+
+if ($sourceRoot === $projectRoot) {
+    err('Source and project directories are the same. Aborting.');
+    exit(1);
+}
+
+echo c('  Source:  ', '90') . $sourceRoot . "\n";
+echo c('  Project: ', '90') . $projectRoot . "\n";
+
+if ($args['dryRun']) {
+    echo "\n" . c('  Dry-run mode — no files will be written.', '33') . "\n";
+}
+
+// ── AUTO files ────────────────────────────────────────────────────────────────
+
+echo "\n";
+info('── Framework-owned files (auto-update) ──────────────────────────────────');
+echo "\n";
+
+$autoResult = processFiles($projectRoot, $sourceRoot, $args['dryRun'], true, true);
+
+if ($autoResult['applied'] === [] && $autoResult['unchanged'] > 0) {
+    skip("All {$autoResult['unchanged']} framework-owned files are up to date.");
+}
+
+// ── PROMPT files ─────────────────────────────────────────────────────────────
+
+echo "\n";
+info('── Shared files (review and apply) ──────────────────────────────────────');
+
+$promptResult = processFiles($projectRoot, $sourceRoot, $args['dryRun'], $args['yes'], false);
+
+if ($promptResult['applied'] === [] && $promptResult['skipped'] === [] && $promptResult['unchanged'] > 0) {
+    echo "\n";
+    skip("All {$promptResult['unchanged']} shared files are up to date.");
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────────
+
+$totalApplied  = count($autoResult['applied']) + count($promptResult['applied']);
+$totalSkipped  = count($promptResult['skipped']);
+$totalUnchanged = $autoResult['unchanged'] + $promptResult['unchanged'];
+
+echo "\n";
+info('── Summary ──────────────────────────────────────────────────────────────');
+echo "\n";
+
+if ($totalApplied > 0) {
+    echo '  ' . c((string) $totalApplied, '32') . " file(s) " . ($args['dryRun'] ? 'would be ' : '') . "updated\n";
+}
+
+if ($totalSkipped > 0) {
+    echo '  ' . c((string) $totalSkipped, '33') . " file(s) skipped\n";
+}
+
+if ($totalUnchanged > 0) {
+    echo '  ' . c((string) $totalUnchanged, '90') . " file(s) already up to date\n";
+}
+
+if ($totalApplied > 0 && !$args['dryRun']) {
+    echo "\n";
+
+    if (in_array('composer.json', $promptResult['applied'], true)) {
+        warn('composer.json was updated — run: composer update');
+    }
+
+    if (
+        in_array('database/migrations/.gitkeep', $autoResult['applied'], true)
+        || $totalApplied > 0
+    ) {
+        warn('Run php ez db:setup to apply any new migrations and seeders.');
+    }
+}
+
+echo "\n";
+exit(0);
