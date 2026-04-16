@@ -102,6 +102,41 @@ Package: `ez-php/rate-limiter`
 | `rate_limiter.redis.port` | `RATE_LIMITER_REDIS_PORT` | int | `6379` | Redis port |
 | `rate_limiter.redis.database` | `RATE_LIMITER_REDIS_DB` | int | `0` | Redis database index |
 
+### Logging — `config/logging.php`
+
+Package: `ez-php/logging`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `logging.driver` | `LOG_DRIVER` | string | `'file'` | Driver: `file`, `stdout`, `null`, `json`, `stack` |
+| `logging.path` | `LOG_PATH` | string | `''` | Log directory for the `file` driver (defaults to `storage/logs` when empty) |
+| `logging.max_bytes` | `LOG_MAX_BYTES` | int | `0` | Max file size in bytes before rotation; `0` = no size limit |
+| `logging.min_level` | `LOG_LEVEL` | string | `''` | Minimum level to write: `debug`, `info`, `warning`, `error`, `critical`; empty = all |
+| `logging.json_inner` | `LOG_JSON_INNER` | string | `'stdout'` | Inner driver for the `json` driver: `file`, `stdout`, `null` |
+| `logging.stack` | — | array | `['file','stdout']` | Drivers for the `stack` driver; configured in `config/logging.php` directly |
+
+**Driver overview:**
+
+| Driver | Description |
+|---|---|
+| `file` | Appends JSON-or-text lines to `LOG_PATH/app-YYYY-MM-DD.log`; date-rotated automatically |
+| `stdout` | `debug`/`info`/`warning` → stdout; `error`/`critical` → stderr |
+| `null` | Discards all entries silently (useful in tests and CI) |
+| `json` | Serialises each entry as a JSON object and forwards to `LOG_JSON_INNER` |
+| `stack` | Fans a single call out to multiple drivers listed in `logging.stack` |
+
+**Wrapping with `MinLevelDriver`:**
+
+When `LOG_LEVEL` is set to a non-empty value, `LogServiceProvider` automatically wraps the configured driver with `MinLevelDriver`. Entries below the minimum are dropped before reaching any driver.
+
+**`RequestContextMiddleware`:**
+
+Registers request-scoped context (`request_id`, `ip`, `method`, `path`, optional `user_id`) into the `Log` facade for the lifetime of each HTTP request. Register it as global middleware:
+
+```php
+$app->middleware(RequestContextMiddleware::class);
+```
+
 ### View — `config/view.php`
 
 Package: `ez-php/view`
@@ -293,6 +328,13 @@ RATE_LIMITER_DRIVER=array
 RATE_LIMITER_REDIS_HOST=127.0.0.1
 RATE_LIMITER_REDIS_PORT=6379
 RATE_LIMITER_REDIS_DB=0
+
+# Logging (ez-php/logging)
+LOG_DRIVER=file
+LOG_LEVEL=debug
+LOG_PATH=
+LOG_MAX_BYTES=0
+LOG_JSON_INNER=stdout
 
 # View (ez-php/view)
 VIEW_PATH=resources/views

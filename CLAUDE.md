@@ -184,6 +184,7 @@ ez-php/
 │   ├── db.php                  — Database connection (env-backed)
 │   ├── mail.php                — Mail driver, SMTP connection, sender defaults (env-backed)
 │   ├── queue.php               — Queue driver and Redis connection (env-backed)
+│   ├── logging.php             — Log driver, path, level, JSON inner driver (env-backed)
 │   ├── rate_limiter.php        — Rate limiter driver and Redis connection (env-backed)
 │   ├── search.php              — Search driver, Meilisearch/Elasticsearch connection (env-backed)
 │   └── view.php                — View template path (env-backed)
@@ -295,6 +296,17 @@ All config files return a plain PHP array. Values are read from the environment 
 | `redis.host` | `QUEUE_REDIS_HOST` | `'127.0.0.1'` |
 | `redis.port` | `QUEUE_REDIS_PORT` | `6379` |
 | `redis.database` | `QUEUE_REDIS_DB` | `0` |
+
+### `config/logging.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `LOG_DRIVER` | `'file'` |
+| `path` | `LOG_PATH` | `''` (falls back to `storage/logs`) |
+| `max_bytes` | `LOG_MAX_BYTES` | `0` |
+| `min_level` | `LOG_LEVEL` | `''` (all levels) |
+| `json_inner` | `LOG_JSON_INNER` | `'stdout'` |
+| `stack` | — | `['file', 'stdout']` |
 
 ### `config/rate_limiter.php`
 
