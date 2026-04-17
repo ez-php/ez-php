@@ -7,6 +7,8 @@ declare(strict_types=1);
 // Install the corresponding Composer package first:
 //   composer require ez-php/<module>
 
+use App\Providers\AppServiceProvider;
+
 return [
     // ─── Auth ────────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/auth
@@ -87,9 +89,5 @@ return [
     // EzPhp\FeatureFlags\FeatureFlagServiceProvider::class,
 
     // ─── Application providers ────────────────────────────────────────────────
-    // Split AppServiceProvider by domain — uncomment the providers you need:
-    App\Providers\AuthServiceProvider::class,
-    App\Providers\HeroServiceProvider::class,
-    App\Providers\SkillServiceProvider::class,
-    App\Providers\BattleServiceProvider::class,
+    AppServiceProvider::class,
 ];
