@@ -10,6 +10,10 @@ declare(strict_types=1);
 use App\Providers\AppServiceProvider;
 
 return [
+    // ─── AI ──────────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/ai
+    // EzPhp\Ai\AiServiceProvider::class,
+
     // ─── Auth ────────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/auth
     // EzPhp\Auth\AuthServiceProvider::class,
