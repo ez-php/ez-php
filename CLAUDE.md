@@ -347,11 +347,12 @@ All config files return a plain PHP array. Values are read from the environment 
 
 ### `provider/core.php`
 
-Returns the ordered list of core framework service providers. **Do not change the order** — providers have implicit dependencies (e.g. `RouterServiceProvider` needs `Config`, `ConsoleServiceProvider` needs `Migrator`).
+Documents the ordered list of core framework service providers (the kernel loads them from `EzPhp\Application\CoreServiceProviders::all()`). **Do not change the order** — providers have implicit dependencies (e.g. `RouterServiceProvider` needs `Config`, `ConsoleServiceProvider` needs `Migrator`).
 
 ```php
 return [
     ConfigServiceProvider::class,
+    TranslatorServiceProvider::class,
     DatabaseServiceProvider::class,
     MigrationServiceProvider::class,
     RouterServiceProvider::class,

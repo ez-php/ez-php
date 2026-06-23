@@ -39,11 +39,11 @@ php bin/setup
 
 This interactive installer shows all available ez-php modules. Enter the numbers of the ones you want (comma-separated), `all`, or `none`. It runs `composer require` and uncomments the matching service providers in `provider/modules.php` automatically.
 
-> You can skip this step and add modules manually later — see [step 12](#12--activate-optional-modules).
+> You can skip this step and add modules manually later — see [step 11](#11--activate-optional-modules).
 
 ---
 
-## 5 — Configure the environment
+## 4 — Configure the environment
 
 ```bash
 cp .env.example .env
@@ -53,7 +53,7 @@ Edit `.env` and adjust the values for your environment. The defaults work with t
 
 ---
 
-## 6 — Start Docker
+## 5 — Start Docker
 
 ```bash
 docker compose up -d
@@ -75,7 +75,7 @@ All subsequent commands run **inside the container** unless otherwise noted.
 
 ---
 
-## 7 — Run migrations
+## 6 — Run migrations
 
 ```bash
 php ez migrate
@@ -85,13 +85,13 @@ This creates the `migrations` table and runs any migration files in `database/mi
 
 ---
 
-## 8 — Open the application
+## 7 — Open the application
 
 Visit [http://localhost:8000](http://localhost:8000) — you should see `Hello from ez-php!`.
 
 ---
 
-## 9 — Add your first route
+## 8 — Add your first route
 
 Edit `routes/web.php`:
 
@@ -112,7 +112,7 @@ Visit [http://localhost:8000/hello/world](http://localhost:8000/hello/world).
 
 ---
 
-## 10 — Create a controller
+## 9 — Create a controller
 
 ```bash
 php ez make:controller UserController
@@ -129,7 +129,7 @@ $router->post('/users', [UserController::class, 'store']);
 
 ---
 
-## 11 — Add a migration
+## 10 — Add a migration
 
 ```bash
 php ez make:migration create_users_table
@@ -168,7 +168,7 @@ php ez migrate
 
 ---
 
-## 12 — Activate optional modules
+## 11 — Activate optional modules
 
 Install the Composer package and uncomment the corresponding line in `provider/modules.php`.
 
@@ -246,7 +246,7 @@ See `provider/modules.php` for a full list of available modules.
 
 ---
 
-## 13 — Run tests
+## 12 — Run tests
 
 ```bash
 composer test
@@ -269,7 +269,7 @@ class UserControllerTest extends HttpTestCase
 
 ---
 
-## 14 — Quality suite
+## 13 — Quality suite
 
 Run the full quality suite (static analysis + code style + tests):
 

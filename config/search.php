@@ -13,4 +13,8 @@ return [
         'user' => getenv('ELASTICSEARCH_USER') ?: '',
         'password' => getenv('ELASTICSEARCH_PASSWORD') ?: '',
     ],
+    'typesense' => [
+        'host' => getenv('TYPESENSE_HOST') ?: 'http://typesense:8108',
+        'key' => getenv('TYPESENSE_KEY') ?: '',
+    ],
 ];
