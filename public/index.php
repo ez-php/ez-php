@@ -7,9 +7,9 @@ use EzPhp\Env\Dotenv;
 use EzPhp\Http\RequestFactory;
 use EzPhp\Http\ResponseEmitter;
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../..');
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->safeLoad();
 
 $request = RequestFactory::createFromGlobals();

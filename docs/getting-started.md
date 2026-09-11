@@ -60,9 +60,9 @@ docker compose up -d
 ```
 
 This starts:
-- **app** — PHP 8.5 application container (port `APP_PORT`, default 8000)
-- **db** — MySQL 8.4 (port `DB_HOST_PORT`, default 3306)
-- **redis** — Redis 7 (port `REDIS_PORT`, default 6379)
+- **app** — PHP 8.5 application container (port `APP_PORT`, default 8001 — deliberately offset from the monorepo's own dev port 8000 so both can run side by side)
+- **db** — MySQL 8.4 (port `DB_HOST_PORT`, default 3308)
+- **redis** — Redis 7 (port `REDIS_PORT`, default 6381)
 - **mailpit** — Mail test server (SMTP port `MAIL_PORT` 1025, web UI `MAIL_WEB_PORT` 8025)
 
 Wait until the DB healthcheck passes (usually a few seconds), then open a shell:
@@ -87,7 +87,7 @@ This creates the `migrations` table and runs any migration files in `database/mi
 
 ## 7 — Open the application
 
-Visit [http://localhost:8000](http://localhost:8000) — you should see `Hello from ez-php!`.
+Visit [http://localhost:8001](http://localhost:8001) — you should see `Hello from ez-php!`.
 
 ---
 
@@ -108,7 +108,7 @@ $router->get('/hello/{name}', function (Request $r, string $name): Response {
 });
 ```
 
-Visit [http://localhost:8000/hello/world](http://localhost:8000/hello/world).
+Visit [http://localhost:8001/hello/world](http://localhost:8001/hello/world).
 
 ---
 
