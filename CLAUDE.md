@@ -279,7 +279,7 @@ The only file the web server should point to. Executed on every request.
 4. new Application(__DIR__ . '/..')                           — basePath = application root
 5. $app->bootstrap()                                          — loads providers, registers, boots
 6. $app->handle($request)                                     — dispatches through middleware + router
-7. ResponseEmitter::emit($response)                           — sends headers and body
+7. $app->send($request, $response)                            — emits headers + body, then runs terminable middleware
 ```
 
 `safeLoad()` is used (not `load()`) — the application starts without a `.env` file if all required variables are set in the real environment (e.g. Docker, CI/CD).
