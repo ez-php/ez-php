@@ -86,7 +86,7 @@ Package: `ez-php/queue`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `queue.driver` | `QUEUE_DRIVER` | string | `'database'` | Driver: `database`, `redis` |
+| `queue.driver` | `QUEUE_DRIVER` | string | `'database'` | Driver: `database`, `redis`, `memory` (in-process; tests only) |
 | `queue.redis.host` | `QUEUE_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `queue.redis.port` | `QUEUE_REDIS_PORT` | int | `6379` | Redis port |
 | `queue.redis.database` | `QUEUE_REDIS_DB` | int | `0` | Redis database index |
@@ -97,7 +97,8 @@ Package: `ez-php/rate-limiter`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `rate_limiter.driver` | `RATE_LIMITER_DRIVER` | string | `'array'` | Driver: `array`, `redis`, `cache_delegate` |
+| `rate_limiter.driver` | `RATE_LIMITER_DRIVER` | string | `'array'` | Driver: `array`, `file`, `redis`, `cache` |
+| `rate_limiter.file.path` | — | string | `sys_get_temp_dir().'/ez-php-rate-limiter'` | Counter directory (`file` driver only) |
 | `rate_limiter.redis.host` | `RATE_LIMITER_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `rate_limiter.redis.port` | `RATE_LIMITER_REDIS_PORT` | int | `6379` | Redis port |
 | `rate_limiter.redis.database` | `RATE_LIMITER_REDIS_DB` | int | `0` | Redis database index |
@@ -211,7 +212,7 @@ return [
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `storage.driver` | `STORAGE_DRIVER` | string | `'local'` | Driver: `local`, `s3` |
+| `storage.driver` | `STORAGE_DRIVER` | string | `'local'` | Driver: `local`, `s3`, `memory` (in-process; tests only) |
 | `storage.local.root` | `STORAGE_ROOT` | string | `''` | Absolute path to the storage root directory |
 | `storage.local.url` | `STORAGE_URL` | string | `''` | Public base URL for local files (e.g. CDN prefix) |
 | `storage.s3.key` | `AWS_ACCESS_KEY_ID` | string | — | AWS / S3-compatible access key ID |
@@ -286,25 +287,25 @@ return [
 
 ### Feature Flags — `config/flags.php`
 
-Package: `ez-php/feature-flags` — create this file in your application's `config/` directory.
+Package: `ez-php/feature-flags` — ships with the template.
 
 ```php
 <?php
 declare(strict_types=1);
 return [
-    'flags' => [
-        'driver' => getenv('FLAGS_DRIVER') ?: 'file',
-        'file'   => __DIR__ . '/flags.php',
-    ],
+    'driver' => getenv('FLAGS_DRIVER') ?: 'file',
+    'file' => getenv('FLAGS_FILE') ?: 'flags.php',
 ];
 ```
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
 | `flags.driver` | `FLAGS_DRIVER` | string | `'file'` | Driver: `file`, `database`, `array` |
-| `flags.file` | — | string | `'config/flags.php'` | Path to the PHP flags file (file driver only) |
+| `flags.file` | `FLAGS_FILE` | string | `'flags.php'` | Path to the PHP flags definition file (file driver only) |
 
-**Flag definitions** (file driver) — create `config/flags.php`:
+The config key is `flags.driver`, not `flags.flags.driver`: the file's basename already supplies the `flags` namespace, so the array is flat.
+
+**Flag definitions** (file driver) — `flags.php` in the application root, shipped empty:
 
 ```php
 <?php
@@ -313,6 +314,48 @@ return [
     'dark-mode'    => false,
 ];
 ```
+
+Keep this file out of `config/`. Everything in `config/` is loaded as a config namespace, so a definitions file at `config/flags.php` would be the driver's own config file — `Flag::enabled('driver')` and `Flag::enabled('file')` would return `true` and every real flag `false`.
+
+### OpenAPI — `config/openapi.php`
+
+Package: `ez-php/openapi` — ships with the template.
+
+```php
+<?php
+declare(strict_types=1);
+return [
+    'endpoint'   => getenv('OPENAPI_ENDPOINT') ?: '/openapi.json',
+    'components' => [],
+];
+```
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `openapi.endpoint` | `OPENAPI_ENDPOINT` | string | `'/openapi.json'` | URI the generated spec is served from |
+| `openapi.components` | — | array | `[]` | Reusable component objects merged into the spec |
+
+The spec's title and version come from `app.name` and `app.version`.
+
+**Component schemas** — the module never derives schemas from your classes.
+`#[ApiResponse(200, User::class)]` emits a `$ref` to `#/components/schemas/User`;
+that reference resolves only if you declare the schema yourself:
+
+```php
+'components' => [
+    'schemas' => [
+        'User' => [
+            'type' => 'object',
+            'properties' => [
+                'id'    => ['type' => 'integer'],
+                'email' => ['type' => 'string', 'format' => 'email'],
+            ],
+        ],
+    ],
+],
+```
+
+The `components` key is omitted from the generated spec while this array is empty.
 
 ---
 
@@ -413,4 +456,8 @@ REDIS_PORT=6379
 
 # Feature Flags (ez-php/feature-flags)
 FLAGS_DRIVER=file
+FLAGS_FILE=flags.php
+
+# OpenAPI (ez-php/openapi)
+OPENAPI_ENDPOINT=/openapi.json
 ```
