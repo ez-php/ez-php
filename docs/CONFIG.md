@@ -221,6 +221,49 @@ return [
 | `storage.s3.endpoint` | `AWS_ENDPOINT` | string\|null | `null` | Custom endpoint for MinIO, R2, Spaces, etc. |
 | `storage.s3.url` | `AWS_URL` | string\|null | `null` | CDN base URL; overrides presigned URLs when set |
 
+### AI — `config/ai.php`
+
+Package: `ez-php/ai`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `ai.driver` | `AI_DRIVER` | string | `'null'` | Driver: `openai`, `anthropic`, `gemini`, `mistral`, `grok`, `log`, `null` |
+| `ai.openai.api_key` | `OPENAI_API_KEY` | string | `''` | OpenAI API key |
+| `ai.openai.model` | `OPENAI_MODEL` | string | `'gpt-4o-mini'` | OpenAI model name |
+| `ai.openai.base_url` | `OPENAI_BASE_URL` | string | `'https://api.openai.com'` | OpenAI API base URL |
+| `ai.anthropic.api_key` | `ANTHROPIC_API_KEY` | string | `''` | Anthropic API key |
+| `ai.anthropic.model` | `ANTHROPIC_MODEL` | string | `'claude-sonnet-4-6'` | Anthropic model name |
+| `ai.anthropic.api_version` | `ANTHROPIC_API_VERSION` | string | `'2023-06-01'` | Anthropic API version header |
+| `ai.gemini.api_key` | `GEMINI_API_KEY` | string | `''` | Google Gemini API key |
+| `ai.gemini.model` | `GEMINI_MODEL` | string | `'gemini-2.0-flash'` | Gemini model name |
+| `ai.mistral.api_key` | `MISTRAL_API_KEY` | string | `''` | Mistral API key |
+| `ai.mistral.model` | `MISTRAL_MODEL` | string | `'mistral-small-latest'` | Mistral model name |
+| `ai.mistral.base_url` | `MISTRAL_BASE_URL` | string | `'https://api.mistral.ai'` | Mistral API base URL |
+| `ai.grok.api_key` | `GROK_API_KEY` | string | `''` | Grok (xAI) API key |
+| `ai.grok.model` | `GROK_MODEL` | string | `'grok-3-mini'` | Grok model name |
+| `ai.grok.base_url` | `GROK_BASE_URL` | string | `'https://api.x.ai'` | Grok API base URL |
+| `ai.log.inner_driver` | `AI_LOG_INNER_DRIVER` | string | `'null'` | Inner driver wrapped by the `log` driver |
+
+### Events — `config/events.php`
+
+Package: `ez-php/events`
+
+Not env-backed — maps event class-strings directly to arrays of listener class-strings. `EventServiceProvider` resolves each listener via the container (autowiring supported) and registers it on boot.
+
+| Config key | Type | Default | Description |
+|---|---|---|---|
+| `events.listeners` | `array<class-string, list<class-string>>` | `[]` | Event class → listener classes map |
+
+```php
+return [
+    'listeners' => [
+        App\Events\UserCreated::class => [
+            App\Listeners\SendWelcomeEmail::class,
+        ],
+    ],
+];
+```
+
 ### Health — `config/health.php`
 
 Package: `ez-php/health` — only required when using the Redis probe.

@@ -129,6 +129,14 @@ vendor/bin/docker-init
 
 This copies `Dockerfile`, `docker-compose.yml`, `.env.example`, `start.sh`, and `docker/` into the module, replacing `{{MODULE_NAME}}` placeholders. Existing files are never overwritten.
 
+Pass `--services` to merge MySQL/Redis service definitions directly into `docker-compose.yml` and uncomment the matching sections in `.env.example`, instead of adapting them by hand afterward:
+
+```
+vendor/bin/docker-init --services=mysql
+vendor/bin/docker-init --services=redis
+vendor/bin/docker-init --services=mysql,redis
+```
+
 After scaffolding:
 
 1. Adapt `docker-compose.yml` — add or remove services (MySQL, Redis) as needed
@@ -179,15 +187,20 @@ ez-php/
 │   ├── Providers/.gitkeep      — Application service providers go here (namespace: App\Providers)
 │   └── Repositories/.gitkeep  — Repository classes go here (namespace: App\Repositories)
 ├── config/
+│   ├── ai.php                  — AI driver and per-provider credentials (env-backed)
 │   ├── app.php                 — App name, debug flag, locale settings (env-backed)
 │   ├── broadcast.php           — Broadcast driver and log path (env-backed)
-│   ├── cache.php               — Cache driver and connection (env-backed)
+│   ├── cache.php                — Cache driver and connection (env-backed)
 │   ├── db.php                  — Database connection (env-backed)
+│   ├── events.php              — Event class → listener class map (not env-backed)
+│   ├── flags.php               — Feature flag driver and file path (env-backed)
+│   ├── health.php              — Redis probe connection for /health (env-backed)
 │   ├── mail.php                — Mail driver, SMTP connection, sender defaults (env-backed)
-│   ├── queue.php               — Queue driver and Redis connection (env-backed)
+│   ├── queue.php                — Queue driver and Redis connection (env-backed)
 │   ├── logging.php             — Log driver, path, level, JSON inner driver (env-backed)
 │   ├── rate_limiter.php        — Rate limiter driver and Redis connection (env-backed)
 │   ├── search.php              — Search driver, Meilisearch/Elasticsearch connection (env-backed)
+│   ├── storage.php             — Storage driver, local path, S3 credentials (env-backed)
 │   └── view.php                — View template path (env-backed)
 ├── database/
 │   └── migrations/.gitkeep     — Migration files go here (loaded by Migrator)
@@ -341,6 +354,63 @@ All config files return a plain PHP array. Values are read from the environment 
 | `elasticsearch.host` | `ELASTICSEARCH_HOST` | `'http://elasticsearch:9200'` |
 | `elasticsearch.user` | `ELASTICSEARCH_USER` | `''` |
 | `elasticsearch.password` | `ELASTICSEARCH_PASSWORD` | `''` |
+
+### `config/ai.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `AI_DRIVER` | `'null'` |
+| `openai.api_key` | `OPENAI_API_KEY` | `''` |
+| `openai.model` | `OPENAI_MODEL` | `'gpt-4o-mini'` |
+| `openai.base_url` | `OPENAI_BASE_URL` | `'https://api.openai.com'` |
+| `anthropic.api_key` | `ANTHROPIC_API_KEY` | `''` |
+| `anthropic.model` | `ANTHROPIC_MODEL` | `'claude-sonnet-4-6'` |
+| `anthropic.api_version` | `ANTHROPIC_API_VERSION` | `'2023-06-01'` |
+| `gemini.api_key` | `GEMINI_API_KEY` | `''` |
+| `gemini.model` | `GEMINI_MODEL` | `'gemini-2.0-flash'` |
+| `mistral.api_key` | `MISTRAL_API_KEY` | `''` |
+| `mistral.model` | `MISTRAL_MODEL` | `'mistral-small-latest'` |
+| `mistral.base_url` | `MISTRAL_BASE_URL` | `'https://api.mistral.ai'` |
+| `grok.api_key` | `GROK_API_KEY` | `''` |
+| `grok.model` | `GROK_MODEL` | `'grok-3-mini'` |
+| `grok.base_url` | `GROK_BASE_URL` | `'https://api.x.ai'` |
+| `log.inner_driver` | `AI_LOG_INNER_DRIVER` | `'null'` |
+
+### `config/events.php`
+
+Not env-backed — maps event class-strings to arrays of listener class-strings.
+
+| Key | Default |
+|---|---|
+| `listeners` | `[]` |
+
+### `config/storage.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `STORAGE_DRIVER` | `'local'` |
+| `local.root` | `STORAGE_ROOT` | `''` |
+| `local.url` | `STORAGE_URL` | `''` |
+| `s3.key` | `AWS_ACCESS_KEY_ID` | `''` |
+| `s3.secret` | `AWS_SECRET_ACCESS_KEY` | `''` |
+| `s3.region` | `AWS_DEFAULT_REGION` | `'us-east-1'` |
+| `s3.bucket` | `AWS_BUCKET` | `''` |
+| `s3.endpoint` | `AWS_ENDPOINT` | `null` |
+| `s3.url` | `AWS_URL` | `null` |
+
+### `config/health.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `redis.host` | `REDIS_HOST` | `'127.0.0.1'` |
+| `redis.port` | `REDIS_PORT` | `6379` |
+
+### `config/flags.php`
+
+| Key | Env var | Default |
+|---|---|---|
+| `driver` | `FLAGS_DRIVER` | `'file'` |
+| `file` | `FLAGS_FILE` | `'config/flags.php'` |
 
 ---
 
