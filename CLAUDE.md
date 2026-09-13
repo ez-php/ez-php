@@ -260,6 +260,11 @@ ez-php/
 │   └── modules.php             — Optional module service providers (uncomment to activate)
 ├── routes/
 │   └── web.php                 — Route definitions; $router is injected by RouterServiceProvider
+├── .claude/commands/
+│   ├── audit-app.md             — /audit-app: structural/config audit for a scaffolded app, findings to TODO.md
+│   └── ideas.md                 — /ideas: sorts findings into IDEAS.md (project-specific) or EZ_PHP_IDEAS.md (module-generic)
+├── IDEAS.md                    — project-specific ideas backlog (ships empty)
+├── EZ_PHP_IDEAS.md             — ez-php module ideas surfaced by the application (ships empty)
 ├── .env.example                — Template for the .env file; copy to .env and fill in values
 └── composer.json               — Project composer config; requires ez-php/framework, namespace App\
 ```
@@ -533,6 +538,7 @@ PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with 
 - **`app/` namespace is `App\`** — PSR-4 autoloading maps `App\` to `app/`. Controllers live in `App\Controllers`, entities in `App\Entities`, repositories in `App\Repositories`, etc. Do not change the namespace without updating `composer.json`.
 - **No tests in the template** — This is a project template, not a library. Tests belong in the application that is created from it.
 - **`.gitkeep` files** — Empty directories cannot be tracked by git. The `.gitkeep` files ensure the directory structure is preserved when the template is committed or distributed.
+- **`IDEAS.md` / `EZ_PHP_IDEAS.md` ship empty, on purpose** — every application built from this template is expected to prefer an existing `ez-php/*` module over reimplementing generic functionality; when no module exists yet, the idea goes into `EZ_PHP_IDEAS.md` (module-generic) or `IDEAS.md` (project-specific) instead of being built ad hoc. See `NEW_PROJECT.md` §3 "Module Policy" / "Ideas Backlogs" — every generated project's own `CLAUDE.md` restates this rule verbatim.
 
 ---
 
