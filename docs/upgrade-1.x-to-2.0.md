@@ -123,3 +123,27 @@ file exists **before** returning the response.
 In 1.x `terminate()` ran inside `handle()`, before the response was sent. In 2.0 it runs after the
 response has been sent — after the last chunk of a stream — and it still runs when the client
 disconnects early.
+
+## 10. AI streams are incremental and can fail mid-way
+
+`ez-php/ai` streams are now read from the provider while it generates. Three things behave differently:
+
+| | 1.x | 2.0 |
+|---|---|---|
+| Connection drops, provider sends an error event, or the stream ends without its completion signal | The stream ended silently and looked complete | `AiStreamException` while iterating or in `collect()` |
+| Gemini completion | No final chunk | One extra `AiChunk` with empty content and a `FinishReason` |
+| When `stream()` returns | After the whole answer | After the response headers; the connection stays open until the stream is consumed, dropped or closed |
+
+```php
+use EzPhp\Ai\AiStreamException;
+
+try {
+    $text = $client->stream($request)->collect();
+} catch (AiStreamException $e) {
+    // handle an incomplete answer
+}
+```
+
+`StreamedResponse::sse(fn () => $stream->toSseEvents())` handles the exception for you. Consume streams right away; do not keep `AiStream` objects around. `AI_STREAM_IDLE_TIMEOUT` (default 120) replaces the 30-second total timeout for streams.
+
+Custom `ez-php/http-client` transports keep working unchanged; they only need `StreamingTransportInterface` if you call `HttpRequest::stream()` through them.

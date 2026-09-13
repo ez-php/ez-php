@@ -229,6 +229,7 @@ Package: `ez-php/ai`
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
 | `ai.driver` | `AI_DRIVER` | string | `'null'` | Driver: `openai`, `anthropic`, `gemini`, `mistral`, `grok`, `log`, `null` |
+| `ai.stream_idle_timeout` | `AI_STREAM_IDLE_TIMEOUT` | int | `120` | Seconds a streamed completion may send nothing before it fails (no total limit) |
 | `ai.openai.api_key` | `OPENAI_API_KEY` | string | `''` | OpenAI API key |
 | `ai.openai.model` | `OPENAI_MODEL` | string | `'gpt-4o-mini'` | OpenAI model name |
 | `ai.openai.base_url` | `OPENAI_BASE_URL` | string | `'https://api.openai.com'` | OpenAI API base URL |

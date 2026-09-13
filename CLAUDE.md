@@ -408,6 +408,7 @@ All config files return a plain PHP array. Values are read from the environment 
 | Key | Env var | Default |
 |---|---|---|
 | `driver` | `AI_DRIVER` | `'null'` |
+| `stream_idle_timeout` | `AI_STREAM_IDLE_TIMEOUT` | `120` |
 | `openai.api_key` | `OPENAI_API_KEY` | `''` |
 | `openai.model` | `OPENAI_MODEL` | `'gpt-4o-mini'` |
 | `openai.base_url` | `OPENAI_BASE_URL` | `'https://api.openai.com'` |
