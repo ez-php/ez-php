@@ -6,7 +6,7 @@ description: Audit this application (scaffolded from the ez-php/ez-php template)
 
 Audit this application — scaffolded from the `ez-php/ez-php` template per `NEW_PROJECT.md` — for structural correctness, config completeness, and drift between this project's own `CLAUDE.md` and its actual code. Write all findings to `TODO.md` (create it if it doesn't exist yet).
 
-This is **not** the monorepo audit suite. `/audit`, `/audit-backend`, `/audit-modules`, and `/audit-architecture` (if present) check a multi-package framework repo — `modules/*/`, `packages.sh`, per-package CI. This application has none of that: it is a single Composer project with `ez-php/framework` and selected `ez-php/*` packages installed as vendor dependencies. Audit what this repo actually contains — `app/`, `config/`, `provider/`, `routes/`, `database/`, `tests/` — not framework/module internals living in `vendor/`.
+This is **not** the monorepo audit suite. `/audit`, `/audit-backend`, `/audit-modules`, `/audit-architecture`, and `/audit-claude` (if present) check a multi-package framework repo — `modules/*/`, `packages.sh`, per-package CI. This application has none of that: it is a single Composer project with `ez-php/framework` and selected `ez-php/*` packages installed as vendor dependencies. Audit what this repo actually contains — `app/`, `config/`, `provider/`, `routes/`, `database/`, `tests/` — not framework/module internals living in `vendor/`.
 
 ## What to audit
 
