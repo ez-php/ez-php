@@ -24,7 +24,7 @@ services:
     image: redis:7-alpine
     container_name: ez-php-template-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT:-6383}:6379"
 
   mailpit:
     image: axllent/mailpit:latest
@@ -49,7 +49,7 @@ services:
     container_name: ez-php-template-db
     restart: unless-stopped
     ports:
-      - "${DB_HOST_PORT:-3306}:3306"
+      - "${DB_HOST_PORT:-3308}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
       MYSQL_DATABASE: "${DB_DATABASE}"
