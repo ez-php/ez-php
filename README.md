@@ -61,6 +61,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Validation | `ez-php/validation` | Rule-based input validation |
 | View | `ez-php/view` | PHP template engine, layouts, sections |
 | View Cache | `ez-php/view-cache` | Output-caching decorator for `ez-php/view` |
+| WebAuthn | `ez-php/webauthn` | WebAuthn / FIDO2 passkey authentication — registration and assertion ceremonies, attestation verification |
 | WebSocket | `ez-php/websocket` | RFC 6455 WebSocket server (Fiber-based) |
 | WebSocket TLS | `ez-php/websocket-tls` | TLS/WSS termination for `ez-php/websocket` |
 
