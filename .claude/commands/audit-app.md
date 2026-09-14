@@ -30,7 +30,7 @@ For each `config/*.php` file present:
 - If `CsrfMiddleware` is registered as global middleware, a `CsrfTokenStoreInterface` binding must exist in some provider — flag its absence (this throws `ContainerException` at request time otherwise).
 
 ### 4. Migrations & Database
-- Every file under `database/migrations/` returns an anonymous class implementing `MigrationInterface` with both `up(PDO $db)` and `down(PDO $db)`.
+- Every file under `database/migrations/` returns an anonymous class implementing `MigrationInterface` with both `up(SchemaInterface $schema)` and `down(SchemaInterface $schema)`.
 - Cross-check tables/columns referenced by `app/Entities/`, `app/Repositories/`, or `app/Models/` against what the migrations actually create — flag an Entity/Model that assumes a column no migration creates.
 
 ### 5. Tests
