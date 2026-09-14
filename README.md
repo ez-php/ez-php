@@ -32,6 +32,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Broadcast | `ez-php/broadcast` | Real-time event broadcasting (SSE) |
 | Cache | `ez-php/cache` | Array, File, Redis cache drivers |
 | DataLoader | `ez-php/dataloader` | Keyed-batch loading and per-key memoization (N+1 prevention) |
+| Event Store | `ez-php/event-store` | Append-only event store with stream replay and projections |
 | Events | `ez-php/events` | Synchronous event bus |
 | Exchange | `ez-php/exchange` | Currency exchange-rate lookup and conversion for Money |
 | Feature Flags | `ez-php/feature-flags` | Feature flag evaluation, File/Database/Array drivers |
