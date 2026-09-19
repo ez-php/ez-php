@@ -205,7 +205,7 @@ return [
         'bucket'     => getenv('AWS_BUCKET') ?: '',
         'endpoint'   => getenv('AWS_ENDPOINT') ?: null,
         'url'        => getenv('AWS_URL') ?: null,
-        'url_expiry' => 3600,
+        'url_expiry' => (int) (getenv('STORAGE_S3_URL_EXPIRY') ?: 3600),
     ],
 ];
 ```
@@ -221,6 +221,7 @@ return [
 | `storage.s3.bucket` | `AWS_BUCKET` | string | — | S3 bucket name |
 | `storage.s3.endpoint` | `AWS_ENDPOINT` | string\|null | `null` | Custom endpoint for MinIO, R2, Spaces, etc. |
 | `storage.s3.url` | `AWS_URL` | string\|null | `null` | CDN base URL; overrides presigned URLs when set |
+| `storage.s3.url_expiry` | `STORAGE_S3_URL_EXPIRY` | int | `3600` | Pre-signed URL lifetime in seconds |
 
 ### AI — `config/ai.php`
 
