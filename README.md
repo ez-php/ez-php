@@ -40,6 +40,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Health | `ez-php/health` | `/health` endpoint with DB, Redis, and Queue probes |
 | HTTP Client | `ez-php/http-client` | Fluent cURL HTTP client |
 | I18n | `ez-php/i18n` | File-based translator, dot-notation keys |
+| Idempotency | `ez-php/idempotency` | `Idempotency-Key` middleware — safe retries for POST/PATCH/PUT/DELETE |
 | JSON Schema | `ez-php/json-schema` | Attribute-driven JSON Schema emission for PHP classes |
 | Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK, Datadog, Loki) for `ez-php/logging` |
 | Logging | `ez-php/logging` | Structured logger, File/Stdout/Null drivers |
