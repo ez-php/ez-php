@@ -66,6 +66,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | WebAuthn | `ez-php/webauthn` | WebAuthn / FIDO2 passkey authentication — registration and assertion ceremonies, attestation verification |
 | WebAuthn Metadata | `ez-php/webauthn-metadata` | FIDO MDS trust-anchor lookups for WebAuthn — blob download, JWT verification, attestation chain trust decisions |
 | WebSocket | `ez-php/websocket` | RFC 6455 WebSocket server (Fiber-based) |
+| WebSocket Client | `ez-php/websocket-client` | RFC 6455 WebSocket client — `ws://` and `wss://`, blocking API |
 | WebSocket TLS | `ez-php/websocket-tls` | TLS/WSS termination for `ez-php/websocket` |
 
 Example:
