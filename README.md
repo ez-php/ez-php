@@ -28,6 +28,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | AI | `ez-php/ai` | Multi-provider AI client — OpenAI, Anthropic, Gemini, Mistral, Grok drivers |
 | Audit | `ez-php/audit` | Event-driven audit log for entity create/update/delete |
 | Auth | `ez-php/auth` | Session and Bearer token authentication |
+| Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
 | BigNum | `ez-php/bignum` | Arbitrary-precision integers and decimals (BCMath/GMP) |
 | Broadcast | `ez-php/broadcast` | Real-time event broadcasting (SSE) |
 | Cache | `ez-php/cache` | Array, File, Redis cache drivers |

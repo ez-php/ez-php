@@ -140,6 +140,10 @@ return [
     // Serves documentation for the spec produced by ez-php/openapi.
     // EzPhp\SwaggerUI\SwaggerUiServiceProvider::class,
 
+    // ─── Authorization (gates & policies) ────────────────────────────────────
+    // Requires: composer require ez-php/authorization   (builds on ez-php/auth)
+    // EzPhp\Authorization\AuthorizationServiceProvider::class,
+
     // ─── Two-factor authentication ───────────────────────────────────────────
     // Requires: composer require ez-php/two-factor   (builds on ez-php/auth)
     // EzPhp\TwoFactor\TwoFactorServiceProvider::class,
