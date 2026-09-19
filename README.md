@@ -64,6 +64,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | View | `ez-php/view` | PHP template engine, layouts, sections |
 | View Cache | `ez-php/view-cache` | Output-caching decorator for `ez-php/view` |
 | WebAuthn | `ez-php/webauthn` | WebAuthn / FIDO2 passkey authentication — registration and assertion ceremonies, attestation verification |
+| WebAuthn Metadata | `ez-php/webauthn-metadata` | FIDO MDS trust-anchor lookups for WebAuthn — blob download, JWT verification, attestation chain trust decisions |
 | WebSocket | `ez-php/websocket` | RFC 6455 WebSocket server (Fiber-based) |
 | WebSocket TLS | `ez-php/websocket-tls` | TLS/WSS termination for `ez-php/websocket` |
 
