@@ -13,4 +13,11 @@ declare(strict_types=1);
 return [
     'driver' => getenv('FLAGS_DRIVER') ?: 'file',
     'file' => getenv('FLAGS_FILE') ?: 'flags.php',
+
+    /*
+     * Percentage rollouts: flag name => 0–100. `Flag::enabledFor($name, $userId)` is then
+     * true for a stable slice of users (crc32-bucketed); the value replaces the stored
+     * flag for that name. Example: 'new-checkout' => 25
+     */
+    'rollouts' => [],
 ];

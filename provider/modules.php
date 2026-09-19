@@ -92,6 +92,58 @@ return [
     // Requires: composer require ez-php/feature-flags
     // EzPhp\FeatureFlags\FeatureFlagServiceProvider::class,
 
+    // ─── Audit ───────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/audit
+    // Register after the database and EventServiceProvider — audit degrades to "disabled" without them.
+    // EzPhp\Audit\AuditServiceProvider::class,
+
+    // ─── Auth: JWT ───────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/auth   (same package as AuthServiceProvider)
+    // Needs JWT_SECRET; register CacheServiceProvider first if you use JwtBlacklist.
+    // EzPhp\Auth\JwtServiceProvider::class,
+
+    // ─── Event Store ─────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/event-store
+    // Needs a bound DatabaseInterface.
+    // EzPhp\EventStore\EventStoreServiceProvider::class,
+
+    // ─── GraphQL ─────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/graphql
+    // Bind a GraphQL\Type\Schema in your own provider and list that provider BEFORE this one.
+    // EzPhp\GraphQL\GraphQLServiceProvider::class,
+
+    // ─── Media ───────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/media   (ext-gd or ext-imagick)
+    // EzPhp\Media\MediaServiceProvider::class,
+
+    // ─── Metrics ─────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/metrics
+    // Registers GET /metrics.
+    // EzPhp\Metrics\MetricsServiceProvider::class,
+
+    // ─── OPcache preloading ──────────────────────────────────────────────────
+    // Requires: composer require ez-php/opcache
+    // EzPhp\OPCache\PreloaderServiceProvider::class,
+
+    // ─── OpenAPI ─────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/openapi
+    // Registers GET /openapi.json.
+    // EzPhp\OpenApi\OpenApiServiceProvider::class,
+
+    // ─── Push notifications ──────────────────────────────────────────────────
+    // Requires: composer require ez-php/push
+    // Register HttpClientServiceProvider before it (the apns/fcm drivers resolve HttpClient).
+    // EzPhp\Push\PushServiceProvider::class,
+
+    // ─── Swagger UI ──────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/swagger-ui
+    // Serves documentation for the spec produced by ez-php/openapi.
+    // EzPhp\SwaggerUI\SwaggerUiServiceProvider::class,
+
+    // ─── Two-factor authentication ───────────────────────────────────────────
+    // Requires: composer require ez-php/two-factor   (builds on ez-php/auth)
+    // EzPhp\TwoFactor\TwoFactorServiceProvider::class,
+
     // ─── Application providers ────────────────────────────────────────────────
     AppServiceProvider::class,
 ];

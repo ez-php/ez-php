@@ -297,6 +297,7 @@ declare(strict_types=1);
 return [
     'driver' => getenv('FLAGS_DRIVER') ?: 'file',
     'file' => getenv('FLAGS_FILE') ?: 'flags.php',
+    'rollouts' => [],
 ];
 ```
 
@@ -304,6 +305,7 @@ return [
 |---|---|---|---|---|
 | `flags.driver` | `FLAGS_DRIVER` | string | `'file'` | Driver: `file`, `database`, `array` |
 | `flags.file` | `FLAGS_FILE` | string | `'flags.php'` | Path to the PHP flags definition file (file driver only) |
+| `flags.rollouts` | — | array | `[]` | Percentage rollouts, flag name => 0–100; `Flag::enabledFor()` enables a stable slice of contexts (crc32 bucket) and the value replaces the stored flag |
 
 The config key is `flags.driver`, not `flags.flags.driver`: the file's basename already supplies the `flags` namespace, so the array is flat.
 

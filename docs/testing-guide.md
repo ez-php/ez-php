@@ -2,6 +2,8 @@
 
 A reference for writing tests in ez-php applications.
 
+> Contributing to a module inside the monorepo? See [`docs/testing-guide.md`](../../docs/testing-guide.md) in the project root for module-level conventions.
+
 ---
 
 ## Test base classes
@@ -265,6 +267,31 @@ $admin = $factory->create(['role' => 'admin']);
 > `make()` and `makeMany()` do not need a database connection. `create()` and `createMany()` require a working repository.
 
 ---
+
+## Fakes
+
+`ez-php/testing` also ships recording fakes, so a test can assert what the code under test dispatched without a driver or a worker:
+
+```php
+use EzPhp\Testing\Fake\{FakeQueue, FakeMailer};
+
+$queue  = new FakeQueue();
+$mailer = new FakeMailer();
+(new Signup($queue, $mailer))->register('a@b.c');
+
+$queue->assertPushed(SendWelcomeMail::class);
+$mailer->assertSent(WelcomeMail::class, fn ($m) => $m->getToAddress() === 'a@b.c');
+```
+
+| Fake | Replaces | Assertions |
+|---|---|---|
+| `FakeQueue` | `QueueInterface` | `assertPushed`, `assertPushedTimes`, `assertNotPushed`, `assertNothingPushed` |
+| `FakeMailer` | `MailerInterface` | `assertSent`, `assertNotSent`, `assertSentCount`, `assertNothingSent` |
+| `FakeChannel` | notification `ChannelInterface` | `assertSentTo`, `assertSentCount`, `assertNothingSent` |
+| `EventSpy::attachTo($dispatcher)` | spy on the real `EventDispatcher` | `assertDispatched`, `assertDispatchedTimes`, `assertNotDispatched`, `assertNothingDispatched` |
+| `FakeStorage` | `StorageInterface` | `assertExists`, `assertMissing`, `assertContents`, `assertEmpty` |
+
+The mail, notification, events and storage fakes need that package installed.
 
 ## Running tests
 

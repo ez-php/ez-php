@@ -528,7 +528,7 @@ Returns optional module service providers. Uncomment or add entries to activate 
 
 ```php
 return [
-    EzPhp\Orm\ModelServiceProvider::class,
+    EzPhp\Orm\EntityServiceProvider::class,
     EzPhp\Orm\Schema\SchemaServiceProvider::class,
     EzPhp\Cache\CacheServiceProvider::class,
     EzPhp\Events\EventServiceProvider::class,

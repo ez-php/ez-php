@@ -123,7 +123,7 @@ public function register(): void
 }
 ```
 
-With `ModelServiceProvider` active, the container can already resolve `DatabaseInterface` and
+With `EntityServiceProvider` active, the container can already resolve `DatabaseInterface` and
 `Hydrator` automatically — concrete repositories are autowired without explicit bindings.
 
 ---
