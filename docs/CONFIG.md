@@ -363,6 +363,26 @@ The `components` key is omitted from the generated spec while this array is empt
 
 ---
 
+### OpenTelemetry — `config/otel.php`
+
+Package: `ez-php/otel`
+
+```php
+<?php
+declare(strict_types=1);
+return [
+    'exporter' => getenv('OTEL_EXPORTER') ?: null,
+    'endpoint' => getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: null,
+    'service_name' => getenv('OTEL_SERVICE_NAME') ?: 'ez-php-app',
+];
+```
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `otel.exporter` | `OTEL_EXPORTER` | string\|null | `'otlp'` if an endpoint is set, else `'null'` | `otlp`, `memory`, or anything else to discard spans |
+| `otel.endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | string\|null | `null` | Full OTLP/HTTP traces URL, e.g. `http://localhost:4318/v1/traces` |
+| `otel.service_name` | `OTEL_SERVICE_NAME` | string | `'ez-php-app'` | `service.name` resource attribute |
+
 ## Environment Variable Quick Reference
 
 A flat list of every variable — useful for generating `.env.example`.
@@ -389,6 +409,11 @@ CACHE_PATH=
 CACHE_REDIS_HOST=127.0.0.1
 CACHE_REDIS_PORT=6379
 CACHE_REDIS_DB=0
+
+# OpenTelemetry (ez-php/otel)
+OTEL_EXPORTER=
+OTEL_EXPORTER_OTLP_ENDPOINT=
+OTEL_SERVICE_NAME=ez-php-app
 
 # Mail (ez-php/mail)
 MAIL_DRIVER=null

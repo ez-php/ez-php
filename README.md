@@ -26,6 +26,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Module | Package | Purpose |
 |---|---|---|
 | AI | `ez-php/ai` | Multi-provider AI client — OpenAI, Anthropic, Gemini, Mistral, Grok drivers |
+| AI Media | `ez-php/ai-media` | Image generation, audio transcription, and text-to-speech — OpenAI/Gemini drivers |
 | Audit | `ez-php/audit` | Event-driven audit log for entity create/update/delete |
 | Auth | `ez-php/auth` | Session and Bearer token authentication |
 | Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
@@ -50,14 +51,17 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Metrics | `ez-php/metrics` | Prometheus metrics endpoint — Counter, Gauge, Histogram |
 | Money | `ez-php/money` | Immutable Money/Currency value objects, allocation, formatting |
 | Notification | `ez-php/notification` | Multi-channel notifications (mail, broadcast, database) |
+| OAuth | `ez-php/oauth` | OAuth2/SSO client flows — authorization code flow with PKCE and state |
 | OPcache | `ez-php/opcache` | OPcache preload script generation |
 | OpenAPI | `ez-php/openapi` | OpenAPI 3.x spec generation from attributes |
 | ORM | `ez-php/orm` | Active Record ORM, Query Builder, relations |
+| OpenTelemetry | `ez-php/otel` | OpenTelemetry spans and OTLP/HTTP JSON export without a vendor SDK |
 | Push | `ez-php/push` | Mobile push notifications (APNS, FCM) via `ez-php/notification` |
 | Queue | `ez-php/queue` | Async job queue, database and Redis drivers |
 | Rate Limiter | `ez-php/rate-limiter` | Rate limiting middleware |
 | Scheduler | `ez-php/scheduler` | Cron-based job scheduler |
 | Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch |
+| Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Array), flash data, id regeneration |
 | Storage | `ez-php/storage` | File storage abstraction, Local and S3 drivers |
 | Swagger UI | `ez-php/swagger-ui` | Serves Swagger UI / ReDoc docs for the OpenAPI spec |
 | Two-Factor | `ez-php/two-factor` | TOTP two-factor authentication, backup codes |
@@ -66,6 +70,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | View Cache | `ez-php/view-cache` | Output-caching decorator for `ez-php/view` |
 | WebAuthn | `ez-php/webauthn` | WebAuthn / FIDO2 passkey authentication — registration and assertion ceremonies, attestation verification |
 | WebAuthn Metadata | `ez-php/webauthn-metadata` | FIDO MDS trust-anchor lookups for WebAuthn — blob download, JWT verification, attestation chain trust decisions |
+| Webhook | `ez-php/webhook` | Outgoing webhooks — HMAC-signed delivery as a retrying queue job, plus incoming signature verification middleware |
 | WebSocket | `ez-php/websocket` | RFC 6455 WebSocket server (Fiber-based) |
 | WebSocket Client | `ez-php/websocket-client` | RFC 6455 WebSocket client — `ws://` and `wss://`, blocking API |
 | WebSocket TLS | `ez-php/websocket-tls` | TLS/WSS termination for `ez-php/websocket` |

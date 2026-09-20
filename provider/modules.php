@@ -51,6 +51,10 @@ return [
     // EzPhp\Orm\EntityServiceProvider::class,
     // EzPhp\Orm\Schema\SchemaServiceProvider::class,
 
+    // ─── OpenTelemetry ───────────────────────────────────────────────────────
+    // Requires: composer require ez-php/otel
+    // EzPhp\Otel\OtelServiceProvider::class,
+
     // ─── Queue ───────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/queue
     // EzPhp\Queue\QueueServiceProvider::class,
