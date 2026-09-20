@@ -152,6 +152,18 @@ return [
     // Requires: composer require ez-php/two-factor   (builds on ez-php/auth)
     // EzPhp\TwoFactor\TwoFactorServiceProvider::class,
 
+    // ─── Sessions ────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/session
+    // EzPhp\Session\SessionServiceProvider::class,
+
+    // ─── Webhooks ────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/webhook   (builds on ez-php/queue)
+    // EzPhp\Webhook\WebhookServiceProvider::class,
+
+    // ─── AI media (images, transcription, speech) ────────────────────────────
+    // Requires: composer require ez-php/ai-media   (builds on ez-php/http-client)
+    // EzPhp\AiMedia\AiMediaServiceProvider::class,
+
     // ─── Application providers ────────────────────────────────────────────────
     AppServiceProvider::class,
 ];

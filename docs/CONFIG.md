@@ -383,6 +383,57 @@ return [
 | `otel.endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | string\|null | `null` | Full OTLP/HTTP traces URL, e.g. `http://localhost:4318/v1/traces` |
 | `otel.service_name` | `OTEL_SERVICE_NAME` | string | `'ez-php-app'` | `service.name` resource attribute |
 
+### Sessions — `config/session.php`
+
+Package: `ez-php/session`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `session.driver` | `SESSION_DRIVER` | string | `'file'` | Handler: `file`, `database`, `redis`, `array` |
+| `session.file.path` | `SESSION_FILE_PATH` | string | `sys_get_temp_dir() . '/ez-session'` | Directory for the `file` driver |
+| `session.database.table` | `SESSION_TABLE` | string | `'sessions'` | Table for the `database` driver; letters, digits and `_` only |
+| `session.redis.host` | `SESSION_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
+| `session.redis.port` | `SESSION_REDIS_PORT` | int | `6379` | Redis port |
+| `session.redis.database` | `SESSION_REDIS_DATABASE` | int | `0` | Redis database index |
+| `session.redis.ttl` | `SESSION_REDIS_TTL` | int | `1440` | Session lifetime in seconds |
+| `session.regenerate_interval` | `SESSION_REGENERATE_INTERVAL` | int | `0` | Seconds between session-id regenerations; `0` disables |
+
+---
+
+### Webhooks — `config/webhook.php`
+
+Package: `ez-php/webhook`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `webhook.secret` | `WEBHOOK_SECRET` | string | `''` | HMAC secret used to sign outgoing and verify incoming webhooks |
+| `webhook.signature_header` | `WEBHOOK_SIGNATURE_HEADER` | string | `'X-Webhook-Signature'` | Header carrying the signature |
+| `webhook.queue` | `WEBHOOK_QUEUE` | string | `'default'` | Queue that delivery jobs are pushed to |
+| `webhook.timestamped` | `WEBHOOK_TIMESTAMPED` | bool | `false` | Sender: add `X-Webhook-Timestamp` and sign `"{timestamp}.{body}"` (replay protection) |
+| `webhook.tolerance` | `WEBHOOK_TOLERANCE` | int | `0` | Receiver: max clock difference in seconds for timestamped signatures; `0` accepts plain signatures only |
+
+---
+
+### AI Media — `config/ai_media.php`
+
+Package: `ez-php/ai-media`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `ai_media.image_driver` | `AI_MEDIA_IMAGE_DRIVER` | string | `'null'` | Image generation: `openai`, `gemini`, `null` |
+| `ai_media.transcription_driver` | `AI_MEDIA_TRANSCRIPTION_DRIVER` | string | `'null'` | Audio transcription: `openai`, `gemini`, `null` |
+| `ai_media.speech_driver` | `AI_MEDIA_SPEECH_DRIVER` | string | `'null'` | Text-to-speech: `openai`, `gemini`, `null` |
+| `ai_media.openai.api_key` | `OPENAI_API_KEY` | string | `''` | OpenAI API key |
+| `ai_media.openai.base_url` | `OPENAI_BASE_URL` | string | `'https://api.openai.com'` | OpenAI API base URL |
+| `ai_media.openai.image_model` | `AI_MEDIA_OPENAI_IMAGE_MODEL` | string | `'dall-e-3'` | OpenAI image model |
+| `ai_media.openai.speech_model` | `AI_MEDIA_OPENAI_SPEECH_MODEL` | string | `'tts-1'` | OpenAI speech model |
+| `ai_media.gemini.api_key` | `GEMINI_API_KEY` | string | `''` | Gemini API key |
+| `ai_media.gemini.base_url` | `AI_MEDIA_GEMINI_BASE_URL` | string | `'https://generativelanguage.googleapis.com'` | Gemini API base URL |
+| `ai_media.gemini.image_model` | `AI_MEDIA_GEMINI_IMAGE_MODEL` | string | `'imagen-3.0-generate-002'` | Gemini image model |
+| `ai_media.gemini.speech_model` | `AI_MEDIA_GEMINI_SPEECH_MODEL` | string | `'gemini-2.5-flash-preview-tts'` | Gemini speech model |
+
+---
+
 ## Environment Variable Quick Reference
 
 A flat list of every variable — useful for generating `.env.example`.
@@ -486,6 +537,28 @@ REDIS_PORT=6379
 # Feature Flags (ez-php/feature-flags)
 FLAGS_DRIVER=file
 FLAGS_FILE=flags.php
+
+# Sessions (ez-php/session)
+SESSION_DRIVER=file
+SESSION_FILE_PATH=
+SESSION_TABLE=sessions
+SESSION_REDIS_HOST=127.0.0.1
+SESSION_REDIS_PORT=6379
+SESSION_REDIS_DATABASE=0
+SESSION_REDIS_TTL=1440
+SESSION_REGENERATE_INTERVAL=0
+
+# Webhooks (ez-php/webhook)
+WEBHOOK_SECRET=
+WEBHOOK_SIGNATURE_HEADER=X-Webhook-Signature
+WEBHOOK_QUEUE=default
+WEBHOOK_TIMESTAMPED=false
+WEBHOOK_TOLERANCE=0
+
+# AI Media (ez-php/ai-media) — shares OPENAI_API_KEY / GEMINI_API_KEY with ez-php/ai
+AI_MEDIA_IMAGE_DRIVER=null
+AI_MEDIA_TRANSCRIPTION_DRIVER=null
+AI_MEDIA_SPEECH_DRIVER=null
 
 # OpenAPI (ez-php/openapi)
 OPENAPI_ENDPOINT=/openapi.json
