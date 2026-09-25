@@ -54,7 +54,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | OAuth | `ez-php/oauth` | OAuth2/SSO client flows — authorization code flow with PKCE and state |
 | OPcache | `ez-php/opcache` | OPcache preload script generation |
 | OpenAPI | `ez-php/openapi` | OpenAPI 3.x spec generation from attributes |
-| ORM | `ez-php/orm` | Active Record ORM, Query Builder, relations |
+| ORM | `ez-php/orm` | Data Mapper ORM (entities + repositories), Query Builder, relations |
 | OpenTelemetry | `ez-php/otel` | OpenTelemetry spans and OTLP/HTTP JSON export without a vendor SDK |
 | Push | `ez-php/push` | Mobile push notifications (APNS, FCM) via `ez-php/notification` |
 | Queue | `ez-php/queue` | Async job queue, database and Redis drivers |

@@ -1,8 +1,10 @@
 # Upgrade Guide: Active Record → Data Mapper
 
-ez-php's ORM is transitioning from the Active Record pattern (`Model`) to the Data Mapper pattern
-(`Entity` + `AbstractRepository`). Both patterns coexist and `Model` remains fully functional —
-the migration is opt-in and can be done incrementally.
+ez-php's ORM has moved from the Active Record pattern (`Model`) to the Data Mapper pattern
+(`Entity` + `AbstractRepository`). `EzPhp\Orm\Model`, its query builder and `ModelTestCase` have been
+**removed** — applications still extending `Model` must migrate before upgrading `ez-php/orm`.
+The framework's `make:model` command was removed with it; use `make:entity` / `make:repository`
+(registered by `EntityServiceProvider`).
 
 This guide walks through converting a typical Active Record model to the Data Mapper pattern.
 
@@ -68,8 +70,10 @@ The entity class carries the same schema configuration (`$table`, `$fillable`, `
 ### 2 — Create the repository
 
 ```bash
-php ez make:repository UserRepository
+php ez make:repository User
 ```
+
+The argument is the **entity** name; the command appends `Repository`.
 
 This creates `app/Repositories/UserRepository.php`:
 
@@ -276,26 +280,27 @@ protected static array $casts = [
 
 ## Testing
 
-Replace `ModelTestCase` with `RepositoryTestCase`:
+Replace `ModelTestCase` with `EzPhp\Testing\DatabaseTestCase` from `ez-php/testing-application`
+(dev dependency). It boots the application against the testing database and wraps every test
+in a transaction that is rolled back afterwards; pass the bound `DatabaseInterface` to the
+repository explicitly:
 
 ```php
+use App\Repositories\UserRepository;
+use EzPhp\Contracts\DatabaseInterface;
+use EzPhp\Testing\DatabaseTestCase;
+
 // Before
 class UserTest extends ModelTestCase { ... }
 
 // After
-class UserRepositoryTest extends RepositoryTestCase
+final class UserRepositoryTest extends DatabaseTestCase
 {
-    private UserRepository $users;
-
-    protected function setUpDatabase(): void
-    {
-        $this->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)');
-        $this->users = new UserRepository($this->db, $this->hydrator);
-    }
-
     public function test_find_returns_null_for_missing_id(): void
     {
-        $this->assertNull($this->users->find(999));
+        $users = new UserRepository($this->app()->make(DatabaseInterface::class));
+
+        $this->assertNull($users->find(999));
     }
 }
 ```
@@ -317,13 +322,11 @@ class UserEntityTest extends TestCase
 
 ---
 
-## Incremental migration
+## Migration order
 
-Active Record and Data Mapper coexist — you do not have to migrate everything at once:
-
-- New models: use `Entity` + `AbstractRepository`
-- Existing models: migrate one model at a time at your own pace
-- `Model` is deprecated but will not be removed until the next major version
+`Model` no longer exists in current `ez-php/orm` releases, so there is no mixed mode on the new
+version. Migrate model by model while still on an ORM release that ships `Model` (both
+patterns coexist there), then upgrade `ez-php/orm` once no class extends `Model` any more.
 
 ---
 

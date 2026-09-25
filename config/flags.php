@@ -13,6 +13,12 @@ declare(strict_types=1);
 return [
     'driver' => getenv('FLAGS_DRIVER') ?: 'file',
     'file' => getenv('FLAGS_FILE') ?: 'flags.php',
+    // driver = redis
+    'redis' => [
+        'host' => getenv('FLAGS_REDIS_HOST') ?: '127.0.0.1',
+        'port' => (int) (getenv('FLAGS_REDIS_PORT') ?: 6379),
+        'database' => (int) (getenv('FLAGS_REDIS_DB') ?: 0),
+    ],
 
     /*
      * Percentage rollouts: flag name => 0–100. `Flag::enabledFor($name, $userId)` is then

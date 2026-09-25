@@ -16,5 +16,13 @@ return [
         'endpoint' => getenv('AWS_ENDPOINT') ?: null,
         'url' => getenv('AWS_URL') ?: null,
         'url_expiry' => (int) (getenv('STORAGE_S3_URL_EXPIRY') ?: 3600),
+        // Streams larger than this use multipart upload (S3 minimum part size: 5 MiB).
+        'multipart_part_size' => (int) (getenv('STORAGE_S3_MULTIPART_PART_SIZE') ?: 8_388_608),
+    ],
+    'gcs' => [
+        'bucket' => getenv('GCS_BUCKET') ?: '',
+        // OAuth2 Bearer token; obtaining/refreshing it is the application's job.
+        'access_token' => getenv('GCS_ACCESS_TOKEN') ?: '',
+        'url' => getenv('GCS_URL') ?: null,
     ],
 ];

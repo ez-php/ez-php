@@ -18,4 +18,18 @@ return [
     ],
     // 0 disables periodic session-id regeneration.
     'regenerate_interval' => (int) (getenv('SESSION_REGENERATE_INTERVAL') ?: 0),
+    // Reject session ids the client chose (session fixation); keep on.
+    'strict_mode' => filter_var(getenv('SESSION_STRICT_MODE') ?: 'true', FILTER_VALIDATE_BOOLEAN),
+    'cookie' => [
+        'name' => getenv('SESSION_COOKIE') ?: '',
+        // null = auto: Secure on HTTPS requests. Set true when TLS terminates at a proxy.
+        'secure' => getenv('SESSION_SECURE_COOKIE') === false || getenv('SESSION_SECURE_COOKIE') === ''
+            ? null
+            : filter_var(getenv('SESSION_SECURE_COOKIE'), FILTER_VALIDATE_BOOLEAN),
+        'httponly' => filter_var(getenv('SESSION_HTTP_ONLY') ?: 'true', FILTER_VALIDATE_BOOLEAN),
+        'samesite' => getenv('SESSION_SAME_SITE') ?: 'Lax',
+        'lifetime' => (int) (getenv('SESSION_LIFETIME') ?: 0),
+        'path' => getenv('SESSION_PATH') ?: '/',
+        'domain' => getenv('SESSION_DOMAIN') ?: '',
+    ],
 ];

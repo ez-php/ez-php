@@ -12,4 +12,10 @@ return [
     'from_address' => getenv('MAIL_FROM_ADDRESS') ?: '',
     'from_name' => getenv('MAIL_FROM_NAME') ?: '',
     'log_path' => getenv('MAIL_LOG_PATH') ?: '',
+    // driver = mailgun
+    'mailgun_domain' => getenv('MAILGUN_DOMAIN') ?: '',
+    'mailgun_secret' => getenv('MAILGUN_SECRET') ?: '',
+    'mailgun_region' => getenv('MAILGUN_REGION') ?: 'us',
+    // driver = sendgrid
+    'sendgrid_api_key' => getenv('SENDGRID_API_KEY') ?: '',
 ];

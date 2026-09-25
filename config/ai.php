@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'driver' => getenv('AI_DRIVER') ?: 'null',
+    // Embeddings pick their driver independently of 'driver': openai, gemini or null.
+    'embedding_driver' => getenv('AI_EMBEDDING_DRIVER') ?: 'null',
     // Seconds a streamed completion may send nothing before it fails (no total limit).
     'stream_idle_timeout' => (int) (getenv('AI_STREAM_IDLE_TIMEOUT') ?: 120),
     'openai' => [

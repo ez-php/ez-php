@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 return [
     'driver' => getenv('RATE_LIMITER_DRIVER') ?: 'array',
+    'file' => [
+        'path' => getenv('RATE_LIMITER_FILE_PATH') ?: sys_get_temp_dir() . '/ez-php-rate-limiter',
+    ],
     'redis' => [
         'host' => getenv('RATE_LIMITER_REDIS_HOST') ?: '127.0.0.1',
         'port' => (int) (getenv('RATE_LIMITER_REDIS_PORT') ?: 6379),

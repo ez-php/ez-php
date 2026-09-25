@@ -8,9 +8,8 @@ return [
 
     // Reusable OpenAPI component objects merged into the generated spec.
     //
-    // ez-php/openapi never derives schemas from your classes — that stays your
-    // responsibility. Declare them here so the $ref values emitted by
-    // #[ApiResponse(200, User::class)] actually resolve:
+    // Declare schemas here (or list classes under 'schema_classes' below) so the
+    // $ref values emitted by #[ApiResponse(200, User::class)] actually resolve:
     //
     //   'components' => [
     //       'schemas' => [
@@ -26,4 +25,7 @@ return [
     //
     // The key is omitted from the spec entirely while this array is empty.
     'components' => [],
+    // Classes whose JSON Schema is generated via ez-php/json-schema and merged
+    // into components.schemas (requires ez-php/json-schema), e.g. [User::class].
+    'schema_classes' => [],
 ];

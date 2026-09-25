@@ -312,7 +312,8 @@ php ez queue:work           # start queue worker (requires ez-php/queue)
 app/
   Controllers/   — HTTP controllers
   Middleware/    — Application middleware
-  Models/        — ORM models (if using ez-php/orm)
+  Entities/      — Data Mapper entities (ez-php/orm; `php ez make:entity`)
+  Repositories/  — Data Mapper repositories (ez-php/orm; `php ez make:repository`)
   Providers/     — Application service providers
 config/
   app.php        — APP_* env vars
