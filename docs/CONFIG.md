@@ -292,16 +292,16 @@ Package: `ez-php/health` — only required when using the Redis probe.
 declare(strict_types=1);
 return [
     'redis' => [
-        'host' => getenv('REDIS_HOST') ?: '127.0.0.1',
-        'port' => (int) (getenv('REDIS_PORT') ?: 6379),
+        'host' => getenv('HEALTH_REDIS_HOST') ?: '127.0.0.1',
+        'port' => (int) (getenv('HEALTH_REDIS_PORT') ?: 6379),
     ],
 ];
 ```
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `health.redis.host` | `REDIS_HOST` | string | `'127.0.0.1'` | Redis host for the Redis probe; probe is skipped if this key is absent |
-| `health.redis.port` | `REDIS_PORT` | int | `6379` | Redis port for the Redis probe |
+| `health.redis.host` | `HEALTH_REDIS_HOST` | string | `'127.0.0.1'` | Redis host for the Redis probe; probe is skipped if this key is absent. Previously read `REDIS_HOST`/`REDIS_PORT` — rename them in existing `.env` files; `REDIS_PORT` in the template is the host-published port, not the in-container one |
+| `health.redis.port` | `HEALTH_REDIS_PORT` | int | `6379` | Redis port for the Redis probe (in-container port) |
 | `health.opcache.enabled` | `HEALTH_OPCACHE_ENABLED` | bool | `false` | Add the OPcache probe |
 
 ### Feature Flags — `config/flags.php`
@@ -622,8 +622,8 @@ GCS_ACCESS_TOKEN=
 GCS_URL=
 
 # Health (ez-php/health) — shares REDIS_HOST / REDIS_PORT with other modules
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
+HEALTH_REDIS_HOST=127.0.0.1
+HEALTH_REDIS_PORT=6379
 HEALTH_OPCACHE_ENABLED=false
 
 # Feature Flags (ez-php/feature-flags)
