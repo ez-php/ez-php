@@ -63,6 +63,7 @@ Package: `ez-php/mail`
 | `mail.from_address` | `MAIL_FROM_ADDRESS` | string | `''` | Default sender address (all drivers) |
 | `mail.from_name` | `MAIL_FROM_NAME` | string | `''` | Default sender display name (all drivers) |
 | `mail.log_path` | `MAIL_LOG_PATH` | string | `''` | Log file path (log driver only) |
+| `mail.timeout` | `MAIL_TIMEOUT` | int | `30` | Network timeout in seconds (smtp, mailgun, sendgrid); HTTP drivers also fail a connect after 10 s |
 
 **SMTP driver** (`MAIL_DRIVER=smtp`):
 
@@ -558,6 +559,7 @@ MAIL_ENCRYPTION=none
 MAIL_FROM_ADDRESS=
 MAIL_FROM_NAME=
 MAIL_LOG_PATH=
+MAIL_TIMEOUT=30
 # Mailgun (MAIL_DRIVER=mailgun)
 MAILGUN_DOMAIN=
 MAILGUN_SECRET=

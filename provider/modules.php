@@ -34,10 +34,6 @@ return [
     // Requires: composer require ez-php/http-client
     // EzPhp\HttpClient\HttpClientServiceProvider::class,
 
-    // ─── I18n ────────────────────────────────────────────────────────────────
-    // Requires: composer require ez-php/i18n
-    // EzPhp\I18n\TranslatorServiceProvider::class,
-
     // ─── Logging ─────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/logging
     // EzPhp\Logging\LogServiceProvider::class,

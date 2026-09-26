@@ -144,14 +144,14 @@ wiring in one step, wrapping `docker-init` for the Docker subset:
 
 ```
 composer module:make <name> -- --description="..."
-php make_module.php <name> --description="..." --services=mysql,redis
+php make_module.php <name> --description="..." --services=mysql,redis --extensions=gmp
 ```
 
 `<name>` is the kebab-case package name; the namespace is derived as
 `EzPhp\<PascalCase>` (each `-`-separated word upper-cased) unless `--namespace=`
 overrides it. Existing exceptions the guess gets wrong: `bignum` → `BigNum`,
 `dataloader` → `DataLoader`, `dotenv` → `Env`, `graphql` → `GraphQL`, `oauth` → `OAuth`,
-`opcache` → `OPCache`, `swagger-ui` → `SwaggerUI`, `webauthn` → `WebAuthn` and
+`opcache` → `OPCache`, `openapi` → `OpenApi`, `swagger-ui` → `SwaggerUI`, `webauthn` → `WebAuthn` and
 `websocket` → `WebSocket`; `websocket-client` → `WebsocketClient`, `websocket-tls` → `WebsocketTls`,
 `webauthn-metadata` → `WebauthnMetadata` and `metrics-statsd` → `MetricsStatsd` are
 intentional lower-case-word namespaces, and `testing-application` shares `EzPhp\Testing\`
@@ -166,7 +166,7 @@ php make_module.php <name> --repo=<git-url> [--namespace=Foo]
 
 This runs `git submodule add <url> modules/<name>` instead of writing package
 files, then applies the same monorepo wiring below. It is mutually exclusive
-with `--services` and `--description` — a submodule brings its own Docker
+with `--services`/`--extensions` and `--description` — a submodule brings its own Docker
 scaffold (if any) and its own `composer.json` description. A minimal `CLAUDE.md`
 stub is written only if the submodule doesn't already ship one, so
 `composer guidelines:sync` has a `# Package:` heading to anchor part 1 against.
@@ -235,29 +235,33 @@ After scaffolding:
 | `ez-php/rate-limiter` | — | 6382 (`REDIS_HOST_PORT`) | — |
 | `ez-php/search` | — | — | 7701 |
 | `ez-php/event-store` | 3311 | — | — |
-| **next free** | **3312** | **6384** | **7702** |
+| `ez-php/broadcast` | — | 6384 (`REDIS_HOST_PORT`) | — |
+| `ez-php/feature-flags` | — | 6385 (`REDIS_HOST_PORT`) | — |
+| `ez-php/scheduler` | — | 6386 (`REDIS_HOST_PORT`) | — |
+| `ez-php/session` | — | 6387 (`REDIS_HOST_PORT`) | — |
+| **next free** | **3312** | **6388** | **7702** |
 
 Only set a port for services the module actually uses. Modules without external services need no port config.
 
 > The `MEILISEARCH_PORT` column is the **host** port. Inside a Compose network the service is always reachable at `http://meilisearch:7700` regardless of the host mapping — only publish-side ports need to be unique.
 
-> The "Redis host port" column is likewise the **host**-published port. `ez-php/cache`, `ez-php/queue`, and `ez-php/rate-limiter` map it through a separate `REDIS_HOST_PORT` env var in `docker-compose.yml`, keeping `REDIS_PORT` fixed at `6379` for in-container connections (the app container always reaches Redis at `redis:6379` over the Compose network, regardless of the host mapping) — the root project and the `ez-php/` application template are the two exceptions, since both have no host/container split and use `REDIS_PORT` for both (the template's other in-container Redis settings — `CACHE_REDIS_PORT`, `QUEUE_REDIS_PORT`, `RATE_LIMITER_REDIS_PORT`, `HEALTH_REDIS_PORT` — stay fixed at `6379` regardless, same as every other module).
+> The "Redis host port" column is likewise the **host**-published port. Every module row maps it through a separate `REDIS_HOST_PORT` env var in `docker-compose.yml`, keeping `REDIS_PORT` fixed at `6379` for in-container connections (the app container always reaches Redis at `redis:6379` over the Compose network, regardless of the host mapping) — the root project and the `ez-php/` application template are the two exceptions, since both have no host/container split and use `REDIS_PORT` for both (the template's other in-container Redis settings — `CACHE_REDIS_PORT`, `QUEUE_REDIS_PORT`, `RATE_LIMITER_REDIS_PORT`, `HEALTH_REDIS_PORT` — stay fixed at `6379` regardless, same as every other module).
 
-> This table tracks only MySQL, Redis, and Meilisearch ports — the three services shared across multiple modules where a collision is otherwise easy to introduce. Mailpit is the one other service with published host ports: SMTP `1025` and web UI `8025`. `ez-php/mail` maps them through `MAILPIT_SMTP_HOST_PORT`/`MAILPIT_API_HOST_PORT` in `modules/mail/docker-compose.yml` (mirroring the `*_HOST_PORT` pattern above, documented in `modules/mail/.env.example`); the root project and the `ez-php/` template each run their own Mailpit on the same defaults (`MAIL_PORT`/`MAIL_WEB_PORT`), so **these three stacks cannot run at the same time** without overriding those variables. It isn't a table column because no module beyond those three runs Mailpit — but a new module adding its own single-use service's ports should likewise parameterize them and document the defaults in its own `.env.example` rather than adding a column here.
+> This table tracks only MySQL, Redis, and Meilisearch ports — the three services shared across multiple modules where a collision is otherwise easy to introduce. Mailpit is the one other service with published host ports: SMTP `1025` and web UI `8025`. `ez-php/mail` maps them through `MAILPIT_SMTP_HOST_PORT`/`MAILPIT_API_HOST_PORT` in `modules/mail/docker-compose.yml` (mirroring the `*_HOST_PORT` pattern above, documented in `modules/mail/.env.example`); the root project and the `ez-php/` template each run their own Mailpit on the same defaults (`MAIL_PORT`/`MAIL_WEB_PORT`), so **these three stacks cannot run at the same time** without overriding those variables. It isn't a table column because no module beyond those three runs Mailpit — but a new module adding its own single-use service's ports should likewise parameterize them and document the defaults in its own `.env.example` rather than adding a column here. Services reached only over the Compose network publish no host port and need no entry at all: Memcached (`memcached:11211` in the root stack and `ez-php/cache`) and the opt-in Elasticsearch/Typesense backends in `modules/search/docker-compose.ci.yml`.
 
 ### 5 — Monorepo scripts
 
-`packages.sh` at the project root is the **central package registry**. Both `push_all.sh` and `update_all.sh` source it — the package list lives in exactly one place.
+`packages.sh` at the project root is the **central package registry**. Every multi-package script sources it — `update_all.sh`, `fullcheck.sh`, `bump_version.sh` and the `git_*_all.sh` scripts (`git_push_all.sh`, `git_pull_all.sh`, `git_tag_all.sh`, `git_delete_all_tags.sh`) — so the package list lives in exactly one place.
 
 When adding a new module, add `"$ROOT/modules/<name>"` to the `PACKAGES` array in `packages.sh` in **alphabetical order** among the other `modules/*` entries (before `framework`, `ez-php`, and the root entry at the end).
 
 ---
 
-# Directory: ez-php
+# Package: ez-php/ez-php
 
 Project template for new ez-php applications. Contains the minimum required structure, entry points, and configuration to run a new application against the framework.
 
-This template is **not a package** — it has no `phpstan.neon`, no `phpunit.xml`, and no tests of its own. It is copied as-is when creating a new project.
+The template is the Composer package `ez-php/ez-php` (`type: project`). It ships its own quality configuration (`phpstan.neon` level 9, `phpunit.xml`, `.php-cs-fixer.php`, `composer full` = analyse → cs → test), a bootstrap smoke test (`tests/ApplicationTest.php`), and a Docker stack (`docker-compose.yml` + `docker/`: app with nginx/supervisord, MySQL, Redis, Mailpit). New applications are created from it with `init-project.sh` — see `NEW_PROJECT.md`.
 
 ---
 
@@ -272,24 +276,33 @@ ez-php/
 │   ├── Controllers/.gitkeep    — Application controllers go here (namespace: App\Controllers)
 │   ├── Entities/.gitkeep       — Data Mapper entity classes go here (namespace: App\Entities)
 │   ├── Middleware/.gitkeep     — Application middleware go here (namespace: App\Middleware)
-│   ├── Providers/.gitkeep      — Application service providers go here (namespace: App\Providers)
+│   ├── Providers/
+│   │   └── AppServiceProvider.php — Application service provider (registered in provider/modules.php)
 │   └── Repositories/.gitkeep  — Repository classes go here (namespace: App\Repositories)
 ├── config/
 │   ├── ai.php                  — AI driver and per-provider credentials (env-backed)
+│   ├── ai_media.php            — Image/transcription/speech drivers, OpenAI/Gemini credentials (env-backed)
 │   ├── app.php                 — App name, debug flag, locale settings (env-backed)
 │   ├── broadcast.php           — Broadcast driver and log path (env-backed)
 │   ├── cache.php                — Cache driver and connection (env-backed)
 │   ├── db.php                  — Database connection (env-backed)
 │   ├── events.php              — Event class → listener class map (not env-backed)
 │   ├── flags.php               — Feature flag driver and definitions-file path (env-backed; the definitions themselves live in ../flags.php)
+│   ├── graphql.php             — GraphQL endpoint, query depth/complexity limits, persisted queries (env-backed)
 │   ├── health.php              — Redis probe connection for /health (env-backed)
 │   ├── mail.php                — Mail driver, SMTP connection, sender defaults (env-backed)
+│   ├── media.php               — Image processing driver: gd or imagick (env-backed)
+│   ├── openapi.php             — OpenAPI spec endpoint, components, schema classes (env-backed)
+│   ├── otel.php                — OpenTelemetry exporter, OTLP endpoint, service name (env-backed)
+│   ├── push.php                — Push driver and APNS/FCM/Web Push credentials (env-backed)
 │   ├── queue.php                — Queue driver and Redis connection (env-backed)
 │   ├── logging.php             — Log driver, path, level, JSON inner driver (env-backed)
 │   ├── rate_limiter.php        — Rate limiter driver and Redis connection (env-backed)
 │   ├── search.php              — Search driver, Meilisearch/Elasticsearch connection (env-backed)
+│   ├── session.php             — Session driver (file/database/redis), regeneration, strict mode, cookie (env-backed)
 │   ├── storage.php             — Storage driver, local path, S3 credentials (env-backed)
-│   └── view.php                — View template path (env-backed)
+│   ├── view.php                — View template path (env-backed)
+│   └── webhook.php             — Webhook secret, signature header, queue, timestamped signatures + tolerance (env-backed)
 ├── database/
 │   └── migrations/.gitkeep     — Migration files go here (loaded by Migrator)
 ├── lang/
@@ -305,6 +318,19 @@ ez-php/
 ├── flags.php                   — Feature flag definitions (path configured by `flags.file` in config/flags.php)
 ├── bin/                        — `setup` / `update` helper scripts
 ├── storage/                    — Local storage driver root
+├── tests/
+│   ├── bootstrap.php           — PHPUnit bootstrap: switches to the testing DB, boots, migrates, seeds
+│   ├── TestCase.php            — Base test case for plain unit tests
+│   ├── ApplicationTestCase.php — Extends ez-php/testing-application's ApplicationTestCase
+│   └── ApplicationTest.php     — Smoke test: the application bootstraps with AppServiceProvider
+├── docker/
+│   ├── app/                    — Dockerfile, nginx.conf, supervisord.conf, php.ini, container-start.sh
+│   └── db/create-db.sh         — MySQL init script (main + testing databases)
+├── docker-compose.yml          — app, db (MySQL), redis, mailpit services
+├── start.sh                    — Copies .env, brings up Docker, waits for MySQL
+├── phpstan.neon                — PHPStan level 9 over app/ and tests/
+├── phpunit.xml                 — Test suite config
+├── .php-cs-fixer.php           — Code style config
 ├── docs/                       — getting-started, CONFIG, testing-guide, upgrade guides
 ├── CHANGELOG.md                — Generated by git-cliff (`cliff.toml`)
 ├── IDEAS.md                    — project-specific ideas backlog (ships empty)
@@ -353,6 +379,8 @@ The exit code from `Console::run()` is passed to `exit()` so shell scripts can d
 ## Configuration Files
 
 All config files return a plain PHP array. Values are read from the environment via `getenv()`.
+
+**The complete key reference for every config file is [`docs/CONFIG.md`](docs/CONFIG.md)** — the sections below cover the core files only and do not duplicate the rest.
 
 ### `config/app.php`
 
@@ -570,7 +598,7 @@ $router->group('/api', function (Router $r) {
 
 ## Language Files — `lang/`
 
-PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with `en` and `de` translation files for validation error messages. Add additional locales by creating `lang/<locale>/` directories.
+PHP array files consumed by `ez-php/i18n` `Translator`. The template ships validation error messages for 8 locales: `de`, `en`, `es`, `fr`, `it`, `nl`, `pl`, `pt`. Add additional locales by creating `lang/<locale>/` directories.
 
 ---
 
@@ -580,7 +608,7 @@ PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with 
 - **`safeLoad()` not `load()`** — the application must start without a `.env` file when variables are injected via the real environment (Docker env vars, CI/CD secrets). `load()` would throw if the file is missing.
 - **`provider/core.php` vs `provider/modules.php`** — Core providers are always loaded and always in the same order (managed by the framework). Module providers are opt-in. This separation makes it clear what is mandatory and what is optional.
 - **`app/` namespace is `App\`** — PSR-4 autoloading maps `App\` to `app/`. Controllers live in `App\Controllers`, entities in `App\Entities`, repositories in `App\Repositories`, etc. Do not change the namespace without updating `composer.json`.
-- **No tests in the template** — This is a project template, not a library. Tests belong in the application that is created from it.
+- **The template ships only a smoke test** — `tests/ApplicationTest.php` proves the application bootstraps with its providers; business tests belong in the application created from it. The quality config (`phpstan.neon`, `phpunit.xml`, `.php-cs-fixer.php`) is shipped so every new application starts with the same level-9 gate as the monorepo.
 - **`.gitkeep` files** — Empty directories cannot be tracked by git. The `.gitkeep` files ensure the directory structure is preserved when the template is committed or distributed.
 - **`IDEAS.md` / `EZ_PHP_IDEAS.md` ship empty, on purpose** — every application built from this template is expected to prefer an existing `ez-php/*` module over reimplementing generic functionality; when no module exists yet, the idea goes into `EZ_PHP_IDEAS.md` (module-generic) or `IDEAS.md` (project-specific) instead of being built ad hoc. See `NEW_PROJECT.md` §3 "Module Policy" / "Ideas Backlogs" — every generated project's own `CLAUDE.md` restates this rule verbatim.
 
@@ -588,12 +616,7 @@ PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with 
 
 ## Starting a New Application from the Skeleton
 
-1. Copy the ez-php directory to the new project location
-2. Copy `.env.example` to `.env` and fill in values
-3. Run `composer install`
-4. Point the web server document root to `public/`
-5. Make `ez` executable: `chmod +x ez`
-6. Run `php ez migrate` to apply migrations (if any)
+Do not copy this directory by hand. `NEW_PROJECT.md` is the canonical process: run `init-project.sh <path> [vendor]` from the monorepo root (or `/new-project` in Claude Code), which copies the template without `.git`/`.env`, sets the project name and free host ports, and brings the Docker stack up. Then follow `NEW_PROJECT.md` for de-templating, module installation and the quality gate.
 
 ---
 
@@ -604,5 +627,5 @@ PHP array files consumed by `ez-php/i18n` `Translator`. The template ships with 
 | Framework source code | `framework/` |
 | Reusable module packages | `modules/*/` |
 | Application business logic | The app created from this template |
-| Tests for the template structure | Not applicable — ez-php is a template |
-| Docker configuration | `docker/` (monorepo root) |
+| Business/feature tests | The app created from this template (the template keeps only its bootstrap smoke test) |
+| Monorepo-wide Docker setup | `docker/` (monorepo root) — the template's own `docker/` serves generated applications only |
