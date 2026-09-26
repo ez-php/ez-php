@@ -51,34 +51,13 @@ Per `NEW_PROJECT.md` §2 and the checklist in §7, flag if still present:
 
 ## Output format
 
-Append to `TODO.md` under a new section:
+`TODO.md` is organized into fixed `## P1` … `## P5` sections (no dates, no per-run metadata). Append each finding as one line under the matching priority section, creating the section heading (in `P1` → `P5` order) if it doesn't exist yet:
 
 ```markdown
-## Application Audit — YYYY-MM-DD
-
-### Summary
-- Areas checked: N  |  Items found: N
-
-### Provider & Config Issues
 - [ ] [P1] Short description — `path/to/file` — Acceptance criteria
-
-### Routes & Controllers
-- [ ] [P2] ...
-
-### Migrations & Data
-- [ ] [P2] ...
-
-### Missing Tests
-- [ ] [P3] ...
-
-### CLAUDE.md Drift
-- [ ] [P3] ...
-
-### Template Leftovers
-- [ ] [P4] ...
 ```
 
-Priority scale:
+Priority scale (decides which `## P` section a finding goes into):
 - **P1** — Installed module not wired up (or vice versa), missing CSRF store binding, or any issue that breaks the app at boot/request time
 - **P2** — Broken route/controller reference, service-locator usage, migration/entity mismatch
 - **P3** — Missing test, stale `CLAUDE.md` project section
@@ -90,5 +69,6 @@ Priority scale:
 - Check only what this repository actually contains — do not go looking for `modules/*/` or `framework/src/`; those live in `vendor/` and are out of scope here.
 - Every item must reference the specific file (and line number where applicable).
 - Do NOT add vague items — every item must be specific and actionable.
-- If `TODO.md` already exists, append a new dated section rather than overwriting.
+- Do NOT add a date, an "areas checked" summary, or any other run metadata to `TODO.md` — only the `[ ] [Pn] ...` item lines, filed under their `## Pn` section.
+- Append each finding under its matching `## Pn` heading; create a missing heading in `P1` → `P5` order rather than overwriting existing sections.
 - When done, report how many items were found per priority level.
