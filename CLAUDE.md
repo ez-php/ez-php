@@ -274,8 +274,8 @@ The template is the Composer package `ez-php/ez-php` (`type: project`). It ships
 ```
 ez-php/
 ├── public/
-│   └── index.php               — HTTP entry point: loads .env, boots Application, emits Response
-├── ez                          — CLI entry point: loads .env, boots Application, runs Console
+│   └── index.php               — HTTP entry point: loads .env, registers provider/modules.php, boots Application, emits Response
+├── ez                          — CLI entry point: loads .env, registers provider/modules.php, boots Application, runs Console
 ├── app/
 │   ├── Controllers/.gitkeep    — Application controllers go here (namespace: App\Controllers)
 │   ├── Entities/.gitkeep       — Data Mapper entity classes go here (namespace: App\Entities)
@@ -356,9 +356,10 @@ The only file the web server should point to. Executed on every request.
 2. Dotenv::createImmutable(__DIR__ . '/..')->safeLoad()      — loads .env, skips if missing
 3. RequestFactory::createFromGlobals()                        — builds Request from superglobals
 4. new Application(__DIR__ . '/..')                           — basePath = application root
-5. $app->bootstrap()                                          — loads providers, registers, boots
-6. $app->handle($request)                                     — dispatches through middleware + router
-7. $app->send($request, $response)                            — emits headers + body, then runs terminable middleware
+5. $app->register(...) for each entry in provider/modules.php — module + application providers
+6. $app->bootstrap()                                          — loads providers, registers, boots
+7. $app->handle($request)                                     — dispatches through middleware + router
+8. $app->send($request, $response)                            — emits headers + body, then runs terminable middleware
 ```
 
 `safeLoad()` is used (not `load()`) — the application starts without a `.env` file if all required variables are set in the real environment (e.g. Docker, CI/CD).
@@ -371,9 +372,10 @@ Executable PHP script. Executed as `php ez <command>` or `./ez <command>`.
 1. require vendor/autoload.php
 2. Dotenv::createImmutable(__DIR__)->safeLoad()
 3. new Application(__DIR__)                                   — basePath = application root (ez is in root)
-4. $app->bootstrap()
-5. $app->make(Console::class)->run($argv)
-6. exit($exitCode)
+4. $app->register(...) for each entry in provider/modules.php
+5. $app->bootstrap()
+6. $app->make(Console::class)->run($argv)
+7. exit($exitCode)
 ```
 
 The exit code from `Console::run()` is passed to `exit()` so shell scripts can detect command failures.
@@ -583,6 +585,8 @@ return [
 ```
 
 Application-level providers (e.g. `App\Providers\AppServiceProvider`) are also registered here.
+
+The kernel does not read this file — it loads only `CoreServiceProviders::all()`. Every entry point (`public/index.php`, `ez`, `tests/bootstrap.php`) requires it and calls `$app->register()` for each entry before `bootstrap()`. A new entry point must do the same, or module providers silently never run.
 
 ---
 
