@@ -31,7 +31,7 @@ All config files live in `config/` and return plain PHP arrays. Values are read 
 | `db.database` | `DB_DATABASE` | string | — | Database name |
 | `db.username` | `DB_USERNAME` | string | — | Database username |
 | `db.password` | `DB_PASSWORD` | string | — | Database password |
-| `db.testing_database` | `DB_TESTING_DATABASE` | string | — | Separate database for test runs (used by `DatabaseTestCase`) |
+| `db.testing_database` | `DB_TESTING_DATABASE` | string | — | Separate database for test runs (swapped into `DB_DATABASE` by `tests/bootstrap.php` / `MigrationBootstrap`, not by `DatabaseTestCase`) |
 
 ### Security headers — `config/security.php`
 
@@ -735,6 +735,7 @@ AI_MEDIA_GEMINI_SPEECH_MODEL=gemini-2.5-flash-preview-tts
 
 # OpenAPI (ez-php/openapi)
 OPENAPI_ENDPOINT=/openapi.json
+OPENAPI_VERSION=3.0
 
 # AI (ez-php/ai)
 AI_DRIVER=null

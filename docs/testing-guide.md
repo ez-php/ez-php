@@ -198,7 +198,34 @@ final class UserRepositoryTest extends DatabaseTestCase
 }
 ```
 
-> Database tests require Docker to be running (`docker compose up -d`). They run against the `DB_TESTING_DATABASE` database defined in `.env`.
+> Database tests require Docker to be running (`docker compose up -d`). `DatabaseTestCase` itself does not switch databases — it uses whatever `DB_DATABASE` holds. The template's `tests/bootstrap.php` replaces `DB_DATABASE` with `DB_TESTING_DATABASE` from `.env` before the suite runs (as do `EzPhp\Testing\MigrationBootstrap`/`SeederBootstrap`); without that bootstrap, set `DB_DATABASE` in `phpunit.xml` instead.
+
+---
+
+## Suite bootstrap: MigrationBootstrap / SeederBootstrap
+
+`DatabaseTestCase` expects the schema to exist already. `EzPhp\Testing\MigrationBootstrap` and `EzPhp\Testing\SeederBootstrap` (from `ez-php/testing-application`) create it once, before any test runs. They are one-shot helpers for a PHPUnit `<bootstrap>` script, not base classes:
+
+```php
+<?php
+// tests/bootstrap.php
+require __DIR__ . '/../vendor/autoload.php';
+
+use EzPhp\Testing\MigrationBootstrap;
+use EzPhp\Testing\SeederBootstrap;
+
+MigrationBootstrap::run(dirname(__DIR__)); // ez migrate
+SeederBootstrap::run(dirname(__DIR__));    // ez db:seed
+```
+
+```xml
+<!-- phpunit.xml -->
+<phpunit bootstrap="tests/bootstrap.php">
+```
+
+Each one swaps `DB_DATABASE` for `DB_TESTING_DATABASE` (when set), boots a fresh `Application` with the providers listed in `provider/modules.php` (so migrations get `ez-php/orm`'s `SchemaInterface` and seeders your module bindings), and runs the console command. A non-zero exit code throws a `RuntimeException`, so the suite stops right away instead of every test failing against an empty database.
+
+The template's own `tests/bootstrap.php` does the same steps inline.
 
 ---
 

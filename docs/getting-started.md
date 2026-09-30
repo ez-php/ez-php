@@ -302,7 +302,7 @@ php ez make:provider Foo    # generate a service provider
 php ez serve                # start the built-in PHP server (without Docker)
 php ez tinker               # interactive REPL
 php ez queue:work           # start queue worker (requires ez-php/queue)
-php ez down --retry=60 --secret=preview  # maintenance mode: 503 for everyone, /preview sets a bypass cookie
+php ez down --retry=60 --secret          # maintenance mode: 503 for everyone; prints a generated /<secret> path that sets a bypass cookie
 php ez up                   # back online
 ```
 
