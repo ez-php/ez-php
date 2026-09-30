@@ -302,7 +302,13 @@ php ez make:provider Foo    # generate a service provider
 php ez serve                # start the built-in PHP server (without Docker)
 php ez tinker               # interactive REPL
 php ez queue:work           # start queue worker (requires ez-php/queue)
+php ez down --retry=60 --secret=preview  # maintenance mode: 503 for everyone, /preview sets a bypass cookie
+php ez up                   # back online
 ```
+
+`down`/`up` only take effect with `MaintenanceModeMiddleware` registered first in the global stack,
+e.g. `$app->middleware(\EzPhp\Middleware\MaintenanceModeMiddleware::class);` in `public/index.php`
+before `bootstrap()`.
 
 ---
 

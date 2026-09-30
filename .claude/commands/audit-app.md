@@ -12,13 +12,13 @@ This is **not** the monorepo audit suite. `/audit`, `/audit-backend`, `/audit-mo
 
 ### 1. Provider wiring
 - `provider/core.php` must be untouched — the kernel loads the 7 core providers via `CoreServiceProviders::all()`, not from this file's contents; flag any edit that suggests someone tried to reorder or remove a core provider here.
-- Every commented-out or missing line in `provider/modules.php` for a package that **is** in `composer.json` `require` is a bug (installed but not wired up) — cross-check against each module's `README.md`/`ez-php/docs/CONFIG.md` for whether it needs a provider at all (e.g. `ez-php/scheduler` registers manually, `ez-php/support` needs none).
+- Every commented-out or missing line in `provider/modules.php` for a package that **is** in `composer.json` `require` is a bug (installed but not wired up) — cross-check against each module's `README.md`/`docs/CONFIG.md` for whether it needs a provider at all (e.g. `ez-php/scheduler` registers manually, `ez-php/support` needs none).
 - Every uncommented provider line for a package that is **not** in `composer.json` `require` is dead config — flag for removal.
 - `App\Providers\AppServiceProvider` must stay last in `provider/modules.php`.
 
 ### 2. Config completeness
 For each `ez-php/*` package actually in `composer.json` `require`:
-- A matching `config/<name>.php` exists if the module needs one (check the module's own `README.md` / `ez-php/docs/CONFIG.md` for its config keys).
+- A matching `config/<name>.php` exists if the module needs one (check the module's own `README.md` / `docs/CONFIG.md` for its config keys).
 - Every key the config file reads via `getenv()` has a corresponding entry in `.env.example` (and ideally `.env`).
 
 For each `config/*.php` file present:
@@ -34,7 +34,7 @@ For each `config/*.php` file present:
 - Cross-check tables/columns referenced by `app/Entities/`, `app/Repositories/`, or `app/Models/` against what the migrations actually create — flag an Entity/Model that assumes a column no migration creates.
 
 ### 5. Tests
-- Every test class extends the appropriate base from `ez-php/testing-application` (`ApplicationTestCase`, `DatabaseTestCase`, `HttpTestCase`) per `ez-php/docs/testing-guide.md` — flag a bare `PHPUnit\Framework\TestCase` extension instead.
+- Every test class extends the appropriate base from `ez-php/testing-application` (`ApplicationTestCase`, `DatabaseTestCase`, `HttpTestCase`) per `docs/testing-guide.md` — flag a bare `PHPUnit\Framework\TestCase` extension instead.
 - Each Controller and each custom Middleware has at least one corresponding test.
 
 ### 6. This project's own CLAUDE.md

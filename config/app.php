@@ -9,6 +9,9 @@ return [
     'fallback_locale' => getenv('APP_FALLBACK_LOCALE') ?: 'en',
     // Optional ordered fallback chain (e.g. ['de_AT', 'de', 'en']); overrides fallback_locale when set.
     'fallback_locales' => null,
+    // Locales LocaleNegotiationMiddleware may choose from Accept-Language (e.g. ['en', 'de', 'de_AT']);
+    // null = 'locale' plus the fallback chain.
+    'locales' => null,
     // Spec version reported by ez-php/openapi.
     'version' => getenv('APP_VERSION') ?: '1.0.0',
     'lang_path' => dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lang',

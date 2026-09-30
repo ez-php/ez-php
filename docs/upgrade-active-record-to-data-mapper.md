@@ -147,7 +147,10 @@ class UserController
 
     public function store(Request $request): Response
     {
-        $user = new User($request->only(['name', 'email']));
+        $user = new User([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+        ]);
         $user->save();
         // ...
     }
@@ -178,7 +181,10 @@ class UserController
 
     public function store(Request $request): Response
     {
-        $user = new User($request->only(['name', 'email']));
+        $user = new User([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+        ]);
         $this->users->save($user);
         // ...
     }

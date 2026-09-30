@@ -12,4 +12,6 @@ return [
         'port' => (int) (getenv('RATE_LIMITER_REDIS_PORT') ?: 6379),
         'database' => (int) (getenv('RATE_LIMITER_REDIS_DB') ?: 0),
     ],
+    // Reverse proxies whose X-Forwarded-For ThrottleMiddleware honours (comma-separated IPs).
+    'trusted_proxies' => getenv('RATE_LIMITER_TRUSTED_PROXIES') ?: '',
 ];

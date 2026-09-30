@@ -17,6 +17,7 @@ All config files live in `config/` and return plain PHP arrays. Values are read 
 | `app.locale` | `APP_LOCALE` | string | `'en'` | Default application locale |
 | `app.fallback_locale` | `APP_FALLBACK_LOCALE` | string | `'en'` | Fallback locale when a translation key is missing |
 | `app.fallback_locales` | — | list\|null | `null` | Ordered fallback chain (e.g. `['de_AT', 'de', 'en']`); overrides `fallback_locale` when set |
+| `app.locales` | — | list\|null | `null` | Locales `LocaleNegotiationMiddleware` may pick from `Accept-Language`; unset = `locale` plus the fallback chain |
 | `app.lang_path` | — | string | `<project>/lang` | Directory holding `<locale>/*.php` translation files |
 | `app.version` | `APP_VERSION` | string | `'1.0.0'` | Application version (used as the OpenAPI spec version) |
 
@@ -31,6 +32,14 @@ All config files live in `config/` and return plain PHP arrays. Values are read 
 | `db.username` | `DB_USERNAME` | string | — | Database username |
 | `db.password` | `DB_PASSWORD` | string | — | Database password |
 | `db.testing_database` | `DB_TESTING_DATABASE` | string | — | Separate database for test runs (used by `DatabaseTestCase`) |
+
+### Security headers — `config/security.php`
+
+Read by the framework's `SecurityHeadersMiddleware` (register it with `$app->middleware(...)`).
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `security.headers` | — | array<string, string\|null> | `[]` | Overrides for the default security headers; `null` removes one, e.g. `'Content-Security-Policy' => "default-src 'self'"` |
 
 ---
 
@@ -111,6 +120,7 @@ Package: `ez-php/rate-limiter`
 | `rate_limiter.redis.host` | `RATE_LIMITER_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `rate_limiter.redis.port` | `RATE_LIMITER_REDIS_PORT` | int | `6379` | Redis port |
 | `rate_limiter.redis.database` | `RATE_LIMITER_REDIS_DB` | int | `0` | Redis database index |
+| `rate_limiter.trusted_proxies` | `RATE_LIMITER_TRUSTED_PROXIES` | string\|list | `''` | Reverse-proxy IPs (comma-separated) whose `X-Forwarded-For` `ThrottleMiddleware` honours |
 
 ### Logging — `config/logging.php`
 
@@ -358,6 +368,7 @@ return [
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
 | `openapi.endpoint` | `OPENAPI_ENDPOINT` | string | `'/openapi.json'` | URI the generated spec is served from |
+| `openapi.version` | `OPENAPI_VERSION` | string | `'3.0'` | `3.0` or `3.1`; for 3.0, JSON Schema 2020-12 constructs in component schemas are converted (nullable, example, …) |
 | `openapi.components` | — | array | `[]` | Reusable component objects merged into the spec |
 | `openapi.schema_classes` | — | list | `[]` | Classes whose JSON Schema (`ez-php/json-schema`) is generated into `components.schemas` |
 
@@ -396,6 +407,8 @@ return [
     'exporter' => getenv('OTEL_EXPORTER') ?: null,
     'endpoint' => getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: null,
     'service_name' => getenv('OTEL_SERVICE_NAME') ?: 'ez-php-app',
+    'sample_ratio' => is_numeric(getenv('OTEL_SAMPLE_RATIO')) ? (float) getenv('OTEL_SAMPLE_RATIO') : 1.0,
+    'batch_size' => is_numeric(getenv('OTEL_BATCH_SIZE')) ? (int) getenv('OTEL_BATCH_SIZE') : 512,
 ];
 ```
 
@@ -404,6 +417,8 @@ return [
 | `otel.exporter` | `OTEL_EXPORTER` | string\|null | `'otlp'` if an endpoint is set, else `'null'` | `otlp`, `memory`, or anything else to discard spans |
 | `otel.endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | string\|null | `null` | Full OTLP/HTTP traces URL, e.g. `http://localhost:4318/v1/traces` |
 | `otel.service_name` | `OTEL_SERVICE_NAME` | string | `'ez-php-app'` | `service.name` resource attribute |
+| `otel.sample_ratio` | `OTEL_SAMPLE_RATIO` | float | `1.0` | Share of traces exported (OTLP only); decided per trace ID, so a trace is kept or dropped whole |
+| `otel.batch_size` | `OTEL_BATCH_SIZE` | int | `512` | Spans per OTLP export call; the rest is sent at the end of the request. `0` = one call per span |
 
 ### Sessions — `config/session.php`
 
@@ -513,6 +528,49 @@ Package: `ez-php/push`
 
 ---
 
+### Metrics — `config/metrics.php`
+
+Package: `ez-php/metrics`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `metrics.endpoint` | `METRICS_ENDPOINT` | string\|false | `'/metrics'` | Path of the Prometheus route; empty or `false` skips auto-registration |
+| `metrics.storage` | `METRICS_STORAGE` | string | `'memory'` | `memory` (per process), `apcu` (one host, needs ext-apcu), `redis` (shared) |
+| `metrics.prefix` | `METRICS_PREFIX` | string | `'ez-php:metrics:'` | Key prefix in APCu/Redis |
+| `metrics.redis.host` / `.port` / `.database` | `METRICS_REDIS_HOST` / `_PORT` / `_DB` | string / int / int | `'127.0.0.1'` / `6379` / `0` | Redis connection for `storage = redis` |
+
+The endpoint is unprotected. To put it behind middleware, set `METRICS_ENDPOINT=` (empty) and
+register the route yourself, e.g. `$router->get('/metrics', [MetricsController::class, '__invoke'])->middleware(...)`.
+
+---
+
+### OPcache preloading — `config/opcache.php`
+
+Package: `ez-php/opcache`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `opcache.output_file` | `OPCACHE_PRELOAD_FILE` | string | `'<project>/preload.php'` (module default without the file: `''`) | Where `Preloader` writes the generated preload script |
+| `opcache.paths` | — | list | framework + contracts `src/`, `app/` | Directories scanned for PHP files |
+| `opcache.exclude` | — | list | `['*Test.php', '*TestCase.php', '*Interface.php']` | Filename glob patterns to skip |
+| `opcache.require_once` | — | bool | `false` | Emit `require_once` instead of `opcache_compile_file()` |
+
+---
+
+### Swagger UI — `config/swagger-ui.php`
+
+Package: `ez-php/swagger-ui`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `swagger-ui.endpoint` | `SWAGGER_UI_ENDPOINT` | string | `'/docs'` | Path of the documentation page |
+| `swagger-ui.spec_url` | `SWAGGER_UI_SPEC_URL` | string | `'/openapi.json'` | URL the page loads the OpenAPI spec from |
+| `swagger-ui.renderer` | `SWAGGER_UI_RENDERER` | string | `'swagger-ui'` | `swagger-ui` or `redoc` |
+
+The page title comes from `app.name`.
+
+---
+
 ## Environment Variable Quick Reference
 
 A flat list of every variable — useful for generating `.env.example`.
@@ -548,6 +606,8 @@ CACHE_MEMCACHED_WEIGHT=0
 OTEL_EXPORTER=
 OTEL_EXPORTER_OTLP_ENDPOINT=
 OTEL_SERVICE_NAME=ez-php-app
+OTEL_SAMPLE_RATIO=1.0
+OTEL_BATCH_SIZE=512
 
 # Mail (ez-php/mail)
 MAIL_DRIVER=null
@@ -579,6 +639,7 @@ RATE_LIMITER_FILE_PATH=
 RATE_LIMITER_REDIS_HOST=127.0.0.1
 RATE_LIMITER_REDIS_PORT=6379
 RATE_LIMITER_REDIS_DB=0
+RATE_LIMITER_TRUSTED_PROXIES=
 
 # Logging (ez-php/logging)
 LOG_DRIVER=file
@@ -718,4 +779,20 @@ PUSH_FCM_CLIENT_EMAIL=
 PUSH_WEBPUSH_PRIVATE_KEY=
 PUSH_WEBPUSH_SUBJECT=
 PUSH_WEBPUSH_TTL=86400
+
+# Metrics (ez-php/metrics) — empty disables the auto-registered route
+METRICS_ENDPOINT=/metrics
+METRICS_STORAGE=memory
+METRICS_PREFIX=ez-php:metrics:
+METRICS_REDIS_HOST=127.0.0.1
+METRICS_REDIS_PORT=6379
+METRICS_REDIS_DB=0
+
+# OPcache preloading (ez-php/opcache)
+OPCACHE_PRELOAD_FILE=
+
+# Swagger UI (ez-php/swagger-ui)
+SWAGGER_UI_ENDPOINT=/docs
+SWAGGER_UI_SPEC_URL=/openapi.json
+SWAGGER_UI_RENDERER=swagger-ui
 ```

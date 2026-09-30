@@ -118,7 +118,7 @@ return [
 
     // ─── Metrics ─────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/metrics
-    // Registers GET /metrics.
+    // Registers GET /metrics (path: metrics.endpoint in config/metrics.php; empty disables it).
     // EzPhp\Metrics\MetricsServiceProvider::class,
 
     // ─── OPcache preloading ──────────────────────────────────────────────────

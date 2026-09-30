@@ -6,6 +6,10 @@ return [
     // URI the generated spec is served from.
     'endpoint' => getenv('OPENAPI_ENDPOINT') ?: '/openapi.json',
 
+    // '3.0' (default) or '3.1'. 3.1 uses JSON Schema 2020-12 as-is; for 3.0 generated
+    // schemas are converted (type arrays → nullable, examples → example, …).
+    'version' => getenv('OPENAPI_VERSION') ?: '3.0',
+
     // Reusable OpenAPI component objects merged into the generated spec.
     //
     // Declare schemas here (or list classes under 'schema_classes' below) so the

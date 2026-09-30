@@ -21,7 +21,7 @@ Visit `http://localhost:${APP_PORT}` (default: `http://localhost:8001`).
 
 ## Optional Modules
 
-Uncomment the relevant lines in `provider/modules.php` and install the package to activate a module.
+Every ez-php module except the framework's own plumbing (`contracts`, `console`, `dotenv`, `http`), the dev-only testing packages (`testing`, `testing-application`) and the `docker` tooling. Install the package with Composer; modules that ship a service provider are activated by uncommenting their line in `provider/modules.php`, libraries are used directly. `i18n` and `validation` already come with the framework.
 
 | Module | Package | Purpose |
 |---|---|---|
@@ -49,6 +49,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Mail | `ez-php/mail` | Transactional email, SMTP/Log/Null drivers |
 | Media | `ez-php/media` | Image resizing and file processing via GD/Imagick |
 | Metrics | `ez-php/metrics` | Prometheus metrics endpoint — Counter, Gauge, Histogram |
+| Metrics StatsD | `ez-php/metrics-statsd` | StatsD/UDP exporter for `ez-php/metrics` |
 | Money | `ez-php/money` | Immutable Money/Currency value objects, allocation, formatting |
 | Notification | `ez-php/notification` | Multi-channel notifications (mail, broadcast, database) |
 | OAuth | `ez-php/oauth` | OAuth2/SSO client flows — authorization code flow with PKCE and state |
@@ -63,6 +64,7 @@ Uncomment the relevant lines in `provider/modules.php` and install the package t
 | Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch |
 | Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Array), flash data, id regeneration |
 | Storage | `ez-php/storage` | File storage abstraction, Local and S3 drivers |
+| Support | `ez-php/support` | Utility classes — `Range`, `WeightedRandom`, `DailyQuota`, `CronExpression`, grid/coordinate helpers |
 | Swagger UI | `ez-php/swagger-ui` | Serves Swagger UI / ReDoc docs for the OpenAPI spec |
 | Two-Factor | `ez-php/two-factor` | TOTP two-factor authentication, backup codes |
 | Validation | `ez-php/validation` | Rule-based input validation |
@@ -88,7 +90,7 @@ composer require ez-php/orm
 |---|---|---|
 | App (nginx) | 8001 | HTTP entry point |
 | MySQL 8.4 | 3308 | Primary database |
-| Redis 7 | 6381 | Cache / queue backend |
+| Redis 7 | 6383 | Cache / queue backend |
 | Mailpit | 8025 (UI), 1025 (SMTP) | Local mail catcher |
 
 ## Quality Suite
