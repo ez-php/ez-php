@@ -684,7 +684,7 @@ GCS_BUCKET=
 GCS_ACCESS_TOKEN=
 GCS_URL=
 
-# Health (ez-php/health) — shares REDIS_HOST / REDIS_PORT with other modules
+# Health (ez-php/health) — own HEALTH_REDIS_HOST / HEALTH_REDIS_PORT (in-container, default 127.0.0.1:6379), not the host-published REDIS_PORT
 HEALTH_REDIS_HOST=127.0.0.1
 HEALTH_REDIS_PORT=6379
 HEALTH_OPCACHE_ENABLED=false
