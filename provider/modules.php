@@ -99,7 +99,7 @@ return [
 
     // ─── Auth: JWT ───────────────────────────────────────────────────────────
     // Requires: composer require ez-php/auth   (same package as AuthServiceProvider)
-    // Needs JWT_SECRET; register CacheServiceProvider first if you use JwtBlacklist.
+    // Needs JWT_SECRET (at least 32 bytes); register CacheServiceProvider first if you use JwtBlacklist.
     // EzPhp\Auth\JwtServiceProvider::class,
 
     // ─── Event Store ─────────────────────────────────────────────────────────
