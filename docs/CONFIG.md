@@ -432,7 +432,8 @@ Package: `ez-php/session`
 | `session.redis.host` | `SESSION_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `session.redis.port` | `SESSION_REDIS_PORT` | int | `6379` | Redis port |
 | `session.redis.database` | `SESSION_REDIS_DATABASE` | int | `0` | Redis database index |
-| `session.redis.ttl` | `SESSION_REDIS_TTL` | int | `1440` | Session lifetime in seconds |
+| `session.redis.ttl` | `SESSION_REDIS_TTL` | int | `1440` | Redis key TTL in seconds (the `redis` driver's idle lifetime); falls back to `SESSION_IDLE_LIFETIME` when unset |
+| `session.idle_lifetime` | `SESSION_IDLE_LIFETIME` | int | php.ini `session.gc_maxlifetime` (PHP default `1440`) | Server-side idle lifetime in seconds: the `file`/`database` drivers treat a session not written for longer as gone (independent of PHP's probabilistic GC), and `StartSessionMiddleware` sets `gc_maxlifetime` to it; `0` disables the check. Not the cookie lifetime (`session.cookie.lifetime`) |
 | `session.regenerate_interval` | `SESSION_REGENERATE_INTERVAL` | int | `0` | Seconds between session-id regenerations; `0` disables |
 | `session.strict_mode` | `SESSION_STRICT_MODE` | bool | `true` | Never adopt a client-chosen session id (fixation protection) |
 | `session.cookie.name` | `SESSION_COOKIE` | string | `''` | Cookie name; empty keeps PHP's `session.name` |
@@ -704,6 +705,7 @@ SESSION_REDIS_HOST=127.0.0.1
 SESSION_REDIS_PORT=6379
 SESSION_REDIS_DATABASE=0
 SESSION_REDIS_TTL=1440
+SESSION_IDLE_LIFETIME=
 SESSION_REGENERATE_INTERVAL=0
 SESSION_STRICT_MODE=true
 SESSION_COOKIE=

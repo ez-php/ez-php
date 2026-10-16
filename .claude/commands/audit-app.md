@@ -31,7 +31,7 @@ For each `config/*.php` file present:
 
 ### 4. Migrations & Database
 - Every file under `database/migrations/` returns an anonymous class implementing `MigrationInterface` with both `up(SchemaInterface $schema)` and `down(SchemaInterface $schema)`.
-- Cross-check tables/columns referenced by `app/Entities/`, `app/Repositories/`, or `app/Models/` against what the migrations actually create — flag an Entity/Model that assumes a column no migration creates.
+- Cross-check tables/columns referenced by `app/Entities/` or `app/Repositories/` against what the migrations actually create — flag an Entity or Repository that assumes a column no migration creates.
 
 ### 5. Tests
 - Every test class extends the appropriate base from `ez-php/testing-application` (`ApplicationTestCase`, `DatabaseTestCase`, `HttpTestCase`) per `docs/testing-guide.md` — flag a bare `PHPUnit\Framework\TestCase` extension instead.
