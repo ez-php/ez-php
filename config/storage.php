@@ -24,5 +24,12 @@ return [
         // OAuth2 Bearer token; obtaining/refreshing it is the application's job.
         'access_token' => getenv('GCS_ACCESS_TOKEN') ?: '',
         'url' => getenv('GCS_URL') ?: null,
+        // Optional service-account credentials: url() then returns expiring V4 signed URLs.
+        // GCS_PRIVATE_KEY may be the PEM on one line with literal \n sequences.
+        'client_email' => getenv('GCS_CLIENT_EMAIL') ?: null,
+        'private_key' => getenv('GCS_PRIVATE_KEY') ?: null,
+        'url_expiry' => (int) (getenv('GCS_URL_EXPIRY') ?: 3600),
+        // API base instead of https://storage.googleapis.com, e.g. a local fake-gcs-server.
+        'endpoint' => getenv('GCS_ENDPOINT') ?: null,
     ],
 ];

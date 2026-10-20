@@ -15,4 +15,9 @@ return [
         'port' => (int) (getenv('CACHE_MEMCACHED_PORT') ?: 11211),
         'weight' => (int) (getenv('CACHE_MEMCACHED_WEIGHT') ?: 0),
     ],
+    // driver = database (tables are created automatically)
+    'database' => [
+        'table' => getenv('CACHE_DB_TABLE') ?: 'cache',
+        'lock_table' => getenv('CACHE_DB_LOCK_TABLE') ?: 'cache_locks',
+    ],
 ];

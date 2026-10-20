@@ -37,7 +37,7 @@ composer install
 php bin/setup
 ```
 
-This interactive installer shows all available ez-php modules. Enter the numbers of the ones you want (comma-separated), `all`, or `none`. It runs `composer require` and uncomments the matching service providers in `provider/modules.php` automatically.
+This interactive installer lists every optional module that has a block in `provider/modules.php` (the menu is read from that file, so the two never disagree; modules without a service provider — `money`, `support`, `oauth`, … — are installed with a plain `composer require`). Enter the numbers of the ones you want (comma-separated), `all`, or `none`. It runs `composer require` and uncomments the matching service providers in `provider/modules.php` automatically.
 
 > You can skip this step and add modules manually later — see [step 11](#11--activate-optional-modules).
 

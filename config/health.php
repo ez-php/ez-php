@@ -14,4 +14,11 @@ return [
         // Adds an OPcache probe (memory/interned-string/key usage) to /health.
         'enabled' => filter_var(getenv('HEALTH_OPCACHE_ENABLED'), FILTER_VALIDATE_BOOLEAN),
     ],
+    // One disk-space probe per path (e.g. the storage directory); empty = none.
+    // DEGRADED below degraded_percent free, UNHEALTHY below unhealthy_percent free.
+    'disk' => [
+        'paths' => array_values(array_filter(explode(',', getenv('HEALTH_DISK_PATHS') ?: ''))),
+        'degraded_percent' => (float) (getenv('HEALTH_DISK_DEGRADED_PERCENT') ?: 10),
+        'unhealthy_percent' => (float) (getenv('HEALTH_DISK_UNHEALTHY_PERCENT') ?: 5),
+    ],
 ];

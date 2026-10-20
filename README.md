@@ -32,7 +32,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
 | BigNum | `ez-php/bignum` | Arbitrary-precision integers and decimals (BCMath/GMP) |
 | Broadcast | `ez-php/broadcast` | Real-time event broadcasting (SSE) |
-| Cache | `ez-php/cache` | Array, File, Redis cache drivers |
+| Cache | `ez-php/cache` | Array, File, Redis, Memcached, Database cache drivers |
 | DataLoader | `ez-php/dataloader` | Keyed-batch loading and per-key memoization (N+1 prevention) |
 | Event Store | `ez-php/event-store` | Append-only event store with stream replay and projections |
 | Events | `ez-php/events` | Synchronous event bus |
@@ -57,13 +57,13 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | OpenAPI | `ez-php/openapi` | OpenAPI 3.x spec generation from attributes |
 | ORM | `ez-php/orm` | Data Mapper ORM (entities + repositories), Query Builder, relations |
 | OpenTelemetry | `ez-php/otel` | OpenTelemetry spans and OTLP/HTTP JSON export without a vendor SDK |
-| Push | `ez-php/push` | Mobile push notifications (APNS, FCM) via `ez-php/notification` |
+| Push | `ez-php/push` | Mobile and browser push notifications (APNS, FCM, Web Push) via `ez-php/notification` |
 | Queue | `ez-php/queue` | Async job queue, database and Redis drivers |
 | Rate Limiter | `ez-php/rate-limiter` | Rate limiting middleware |
 | Scheduler | `ez-php/scheduler` | Cron-based job scheduler |
-| Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch |
-| Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Array), flash data, id regeneration |
-| Storage | `ez-php/storage` | File storage abstraction, Local and S3 drivers |
+| Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch/Typesense |
+| Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Cache/Array), flash data, id regeneration |
+| Storage | `ez-php/storage` | File storage abstraction, Local, S3 and GCS drivers |
 | Support | `ez-php/support` | Utility classes — `Range`, `WeightedRandom`, `DailyQuota`, `CronExpression`, grid/coordinate helpers |
 | Swagger UI | `ez-php/swagger-ui` | Serves Swagger UI / ReDoc docs for the OpenAPI spec |
 | Two-Factor | `ez-php/two-factor` | TOTP two-factor authentication, backup codes |

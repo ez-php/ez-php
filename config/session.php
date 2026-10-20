@@ -16,6 +16,11 @@ return [
         'database' => (int) (getenv('SESSION_REDIS_DATABASE') ?: 0),
         'ttl' => (int) (getenv('SESSION_REDIS_TTL') ?: getenv('SESSION_IDLE_LIFETIME') ?: ini_get('session.gc_maxlifetime') ?: 1440),
     ],
+    // driver = cache: sessions on the ez-php/cache store (CacheInterface), TTL = idle_lifetime
+    // (idle_lifetime 0: the longer of cookie.lifetime and php.ini session.gc_maxlifetime)
+    'cache' => [
+        'prefix' => getenv('SESSION_CACHE_PREFIX') ?: 'session:',
+    ],
     // 0 disables periodic session-id regeneration.
     // Server-side idle lifetime in seconds: the file/database drivers treat a session
     // not written for longer as gone, and gc_maxlifetime is set to match. 0 disables.

@@ -10,7 +10,8 @@ declare(strict_types=1);
  * the post-create-project-cmd Composer hook, or manually with `php bin/setup`.
  *
  * What it does:
- *   1. Presents a numbered list of optional ez-php modules.
+ *   1. Presents a numbered list of the optional ez-php modules listed in
+ *      provider/modules.php (every module block with a `Requires:` line).
  *   2. Asks the user which ones to install (comma-separated numbers or "all"/"none").
  *   3. Runs `composer require ez-php/<module>` for each selected module.
  *   4. Uncomments the corresponding service provider lines in provider/modules.php.
@@ -19,69 +20,57 @@ declare(strict_types=1);
 // ── Module registry ────────────────────────────────────────────────────────
 
 /**
- * @var array<string, array{desc: string, providers: list<string>}>
+ * Read the installable modules from provider/modules.php — the single source of
+ * truth for optional module providers, so this menu cannot drift from it.
+ *
+ * Each module block there looks like:
+ *
+ *   // ─── Cache ───────────────────────────────────────
+ *   // Requires: composer require ez-php/cache
+ *   // EzPhp\Cache\CacheServiceProvider::class,
+ *
+ * Blocks naming the same package (e.g. Auth and Auth: JWT) are merged; a block
+ * without a provider line (e.g. Scheduler) is installed but has nothing to activate.
+ *
+ * @param string $modulesFile Absolute path to provider/modules.php.
+ *
+ * @return array<string, array{desc: string, providers: list<string>}> Keyed by package name without `ez-php/`, sorted.
  */
-const MODULES = [
-    'auth'         => [
-        'desc'      => 'Session and Bearer token authentication',
-        'providers' => ['EzPhp\\Auth\\AuthServiceProvider'],
-    ],
-    'broadcast'    => [
-        'desc'      => 'WebSocket / SSE event broadcasting',
-        'providers' => ['EzPhp\\Broadcast\\BroadcastServiceProvider'],
-    ],
-    'cache'        => [
-        'desc'      => 'Array, File, and Redis cache drivers',
-        'providers' => ['EzPhp\\Cache\\CacheServiceProvider'],
-    ],
-    'events'       => [
-        'desc'      => 'Synchronous in-process event bus',
-        'providers' => ['EzPhp\\Events\\EventServiceProvider'],
-    ],
-    'http-client'  => [
-        'desc'      => 'Fluent cURL HTTP client',
-        'providers' => ['EzPhp\\HttpClient\\HttpClientServiceProvider'],
-    ],
-    'i18n'         => [
-        'desc'      => 'Locale-based translator with dot-notation keys',
-        'providers' => ['EzPhp\\I18n\\TranslatorServiceProvider'],
-    ],
-    'logging'      => [
-        'desc'      => 'File, Stdout, and Null log drivers',
-        'providers' => ['EzPhp\\Logging\\LogServiceProvider'],
-    ],
-    'mail'         => [
-        'desc'      => 'SMTP and log mail drivers',
-        'providers' => ['EzPhp\\Mail\\MailServiceProvider'],
-    ],
-    'orm'          => [
-        'desc'      => 'Active Record ORM, Query Builder, Schema Builder',
-        'providers' => [
-            'EzPhp\\Orm\\EntityServiceProvider',
-            'EzPhp\\Orm\\Schema\\SchemaServiceProvider',
-        ],
-    ],
-    'queue'        => [
-        'desc'      => 'Async job queue — database and Redis drivers',
-        'providers' => ['EzPhp\\Queue\\QueueServiceProvider'],
-    ],
-    'rate-limiter' => [
-        'desc'      => 'Request rate limiting with ThrottleMiddleware',
-        'providers' => ['EzPhp\\RateLimiter\\RateLimiterServiceProvider'],
-    ],
-    'search'       => [
-        'desc'      => 'Search index driver (Meilisearch / Elasticsearch)',
-        'providers' => ['EzPhp\\Search\\SearchServiceProvider'],
-    ],
-    'validation'   => [
-        'desc'      => 'Rule-based input validation',
-        'providers' => ['EzPhp\\Validation\\ValidationServiceProvider'],
-    ],
-    'view'         => [
-        'desc'      => 'PHP template engine',
-        'providers' => ['EzPhp\\View\\ViewServiceProvider'],
-    ],
-];
+function moduleRegistry(string $modulesFile): array
+{
+    $lines = is_file($modulesFile) ? (file($modulesFile, FILE_IGNORE_NEW_LINES) ?: []) : [];
+    $modules = [];
+    $title = '';
+    $package = null;
+
+    foreach ($lines as $line) {
+        if (preg_match('~^\s*//\s*─── (.+?) ─~u', $line, $m) === 1) {
+            $title = trim($m[1]);
+            $package = null;
+        } elseif (preg_match('~^\s*//\s*Requires: composer require ez-php/([a-z0-9-]+)~', $line, $m) === 1) {
+            $package = $m[1];
+            $modules[$package] ??= ['titles' => [], 'providers' => []];
+            $modules[$package]['titles'][] = $title;
+        } elseif ($package !== null && preg_match('~^\s*//\s*([A-Za-z0-9_\\\\]+)::class,~', $line, $m) === 1) {
+            $modules[$package]['providers'][] = $m[1];
+        }
+    }
+
+    ksort($modules);
+
+    $registry = [];
+
+    foreach ($modules as $key => $module) {
+        $registry[$key] = [
+            'desc' => implode(' · ', array_values(array_unique($module['titles']))),
+            'providers' => array_values(array_unique($module['providers'])),
+        ];
+    }
+
+    return $registry;
+}
+
+define('MODULES', moduleRegistry(dirname(__DIR__) . '/provider/modules.php'));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 

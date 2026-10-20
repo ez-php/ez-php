@@ -20,6 +20,9 @@ All config files live in `config/` and return plain PHP arrays. Values are read 
 | `app.locales` | — | list\|null | `null` | Locales `LocaleNegotiationMiddleware` may pick from `Accept-Language`; unset = `locale` plus the fallback chain |
 | `app.lang_path` | — | string | `<project>/lang` | Directory holding `<locale>/*.php` translation files |
 | `app.version` | `APP_VERSION` | string | `'1.0.0'` | Application version (used as the OpenAPI spec version) |
+| — | `APP_ENV` | string | — | Deployment environment (`local`, `production`, …). Read from the process environment via `getenv()`, **not** from `config/app.php`. When it is `production`, `db:seed` and `db:setup` refuse to run without `--force`, and `ExceptionHandlerServiceProvider` passes it to `DefaultExceptionHandler`, which logs a warning when debug mode is on in production |
+
+> `APP_DEBUG` is also read directly from the environment by `ExceptionHandlerServiceProvider::boot()`: when true, `DebugToolbarMiddleware` is added to the global middleware stack.
 
 ### Database — `config/db.php`
 
@@ -45,13 +48,22 @@ Read by the framework's `SecurityHeadersMiddleware` (register it with `$app->mid
 
 ## Optional Modules
 
+### Auth (JWT) — environment only
+
+`ez-php/auth`'s `JwtServiceProvider` reads these with `getenv()`; there is no `config/auth.php` key.
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| — | `JWT_SECRET` | string | — | **Required** when `JwtManager` is resolved: HMAC signing key of at least 32 bytes (`JwtManager::MIN_SECRET_BYTES`), e.g. `bin2hex(random_bytes(32))`. A shorter or empty value makes resolving `JwtManager` throw `InvalidArgumentException` |
+| — | `JWT_TTL` | int | `3600` | Token lifetime in seconds |
+
 ### Cache — `config/cache.php`
 
 Package: `ez-php/cache`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `cache.driver` | `CACHE_DRIVER` | string | `'array'` | Driver: `array`, `file`, `redis`, `memcached` |
+| `cache.driver` | `CACHE_DRIVER` | string | `'array'` | Driver: `array`, `file`, `redis`, `memcached`, `database` |
 | `cache.file_path` | `CACHE_PATH` | string | `sys_get_temp_dir().'/ez-cache'` | Directory for the file cache driver |
 | `cache.redis.host` | `CACHE_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `cache.redis.port` | `CACHE_REDIS_PORT` | int | `6379` | Redis port |
@@ -59,6 +71,8 @@ Package: `ez-php/cache`
 | `cache.memcached.host` | `CACHE_MEMCACHED_HOST` | string | `'127.0.0.1'` | Memcached host |
 | `cache.memcached.port` | `CACHE_MEMCACHED_PORT` | int | `11211` | Memcached port |
 | `cache.memcached.weight` | `CACHE_MEMCACHED_WEIGHT` | int | `0` | Server weight |
+| `cache.database.table` | `CACHE_DB_TABLE` | string | `'cache'` | Entry table of the database driver (auto-created) |
+| `cache.database.lock_table` | `CACHE_DB_LOCK_TABLE` | string | `'cache_locks'` | Lock table of the database driver (auto-created) |
 
 Cache values must be `null`, scalars or arrays — every driver rejects objects.
 
@@ -241,13 +255,17 @@ return [
 | `storage.s3.secret` | `AWS_SECRET_ACCESS_KEY` | string | — | AWS / S3-compatible secret access key |
 | `storage.s3.region` | `AWS_DEFAULT_REGION` | string | `'us-east-1'` | AWS region |
 | `storage.s3.bucket` | `AWS_BUCKET` | string | — | S3 bucket name |
-| `storage.s3.endpoint` | `AWS_ENDPOINT` | string\|null | `null` | Custom endpoint for MinIO, R2, Spaces, etc. |
+| `storage.s3.endpoint` | `AWS_ENDPOINT` | string\|null | `null` | Custom endpoint for MinIO, R2, Spaces, etc.; an explicit `http://` scheme is kept (local MinIO without TLS), anything else is reached over HTTPS |
 | `storage.s3.url` | `AWS_URL` | string\|null | `null` | CDN base URL; overrides presigned URLs when set |
 | `storage.s3.url_expiry` | `STORAGE_S3_URL_EXPIRY` | int | `3600` | Pre-signed URL lifetime in seconds |
 | `storage.s3.multipart_part_size` | `STORAGE_S3_MULTIPART_PART_SIZE` | int | `8388608` | Part size for multipart `putStream()` uploads (≥ 5 MiB) |
 | `storage.gcs.bucket` | `GCS_BUCKET` | string | `''` | Google Cloud Storage bucket |
 | `storage.gcs.access_token` | `GCS_ACCESS_TOKEN` | string | `''` | OAuth2 Bearer token (refreshing it is the application's job) |
-| `storage.gcs.url` | `GCS_URL` | string\|null | `null` | CDN/public base URL for `url()` |
+| `storage.gcs.url` | `GCS_URL` | string\|null | `null` | CDN/public base URL for `url()` (wins over signing) |
+| `storage.gcs.client_email` | `GCS_CLIENT_EMAIL` | string\|null | `null` | Service-account email; with `private_key`, `url()` returns V4 signed URLs |
+| `storage.gcs.private_key` | `GCS_PRIVATE_KEY` | string\|null | `null` | PEM RSA key of that service account (literal `\n` sequences are converted); requires ext-openssl |
+| `storage.gcs.url_expiry` | `GCS_URL_EXPIRY` | int | `3600` | Signed-URL lifetime in seconds (max 604800 = 7 days) |
+| `storage.gcs.endpoint` | `GCS_ENDPOINT` | string\|null | `null` | API base URL instead of `https://storage.googleapis.com` (e.g. a local fake-gcs-server); also the base of public object URLs — signed URLs always target Google |
 
 ### AI — `config/ai.php`
 
@@ -296,7 +314,7 @@ return [
 
 ### Health — `config/health.php`
 
-Package: `ez-php/health` — only required when using the Redis probe.
+Package: `ez-php/health` — only required when using the Redis, OPcache or disk-space probes.
 
 ```php
 <?php
@@ -314,6 +332,9 @@ return [
 | `health.redis.host` | `HEALTH_REDIS_HOST` | string | `'127.0.0.1'` | Redis host for the Redis probe; probe is skipped if this key is absent. Previously read `REDIS_HOST`/`REDIS_PORT` — rename them in existing `.env` files; `REDIS_PORT` in the template is the host-published port, not the in-container one |
 | `health.redis.port` | `HEALTH_REDIS_PORT` | int | `6379` | Redis port for the Redis probe (in-container port) |
 | `health.opcache.enabled` | `HEALTH_OPCACHE_ENABLED` | bool | `false` | Add the OPcache probe |
+| `health.disk.paths` | `HEALTH_DISK_PATHS` | list | `[]` | Paths whose filesystem free space is probed (env: comma-separated); one `DiskSpaceProbe` per path, none when empty |
+| `health.disk.degraded_percent` | `HEALTH_DISK_DEGRADED_PERCENT` | float | `10` | Free share (%) below which a disk probe reports DEGRADED |
+| `health.disk.unhealthy_percent` | `HEALTH_DISK_UNHEALTHY_PERCENT` | float | `5` | Free share (%) below which a disk probe reports UNHEALTHY |
 
 ### Feature Flags — `config/flags.php`
 
@@ -331,7 +352,7 @@ return [
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `flags.driver` | `FLAGS_DRIVER` | string | `'file'` | Driver: `file`, `database`, `redis` |
+| `flags.driver` | `FLAGS_DRIVER` | string | `'file'` | Driver: `file`, `database`, `redis`, `array` (empty, in-memory; CI/tests) |
 | `flags.file` | `FLAGS_FILE` | string | `'flags.php'` | Path to the PHP flags definition file (file driver only) |
 | `flags.redis.host` | `FLAGS_REDIS_HOST` | string | `'127.0.0.1'` | Redis host (redis driver only) |
 | `flags.redis.port` | `FLAGS_REDIS_PORT` | int | `6379` | Redis port |
@@ -426,14 +447,15 @@ Package: `ez-php/session`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `session.driver` | `SESSION_DRIVER` | string | `'file'` | Handler: `file`, `database`, `redis`, `array` |
+| `session.driver` | `SESSION_DRIVER` | string | `'file'` | Handler: `file`, `database`, `redis`, `cache` (the `ez-php/cache` store), `array` |
 | `session.file.path` | `SESSION_FILE_PATH` | string | `sys_get_temp_dir() . '/ez-session'` | Directory for the `file` driver |
 | `session.database.table` | `SESSION_TABLE` | string | `'sessions'` | Table for the `database` driver; letters, digits and `_` only |
 | `session.redis.host` | `SESSION_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `session.redis.port` | `SESSION_REDIS_PORT` | int | `6379` | Redis port |
 | `session.redis.database` | `SESSION_REDIS_DATABASE` | int | `0` | Redis database index |
 | `session.redis.ttl` | `SESSION_REDIS_TTL` | int | `1440` | Redis key TTL in seconds (the `redis` driver's idle lifetime); falls back to `SESSION_IDLE_LIFETIME` when unset |
-| `session.idle_lifetime` | `SESSION_IDLE_LIFETIME` | int | php.ini `session.gc_maxlifetime` (PHP default `1440`) | Server-side idle lifetime in seconds: the `file`/`database` drivers treat a session not written for longer as gone (independent of PHP's probabilistic GC), and `StartSessionMiddleware` sets `gc_maxlifetime` to it; `0` disables the check. Not the cookie lifetime (`session.cookie.lifetime`) |
+| `session.cache.prefix` | `SESSION_CACHE_PREFIX` | string | `'session:'` | Key prefix of the `cache` driver |
+| `session.idle_lifetime` | `SESSION_IDLE_LIFETIME` | int | php.ini `session.gc_maxlifetime` (PHP default `1440`) | Server-side idle lifetime in seconds: the `file`/`database` drivers treat a session not written for longer as gone (independent of PHP's probabilistic GC), and `StartSessionMiddleware` sets `gc_maxlifetime` to it; `0` disables the check (the `redis`/`cache` drivers then use the longer of `session.cookie.lifetime` and php.ini's `session.gc_maxlifetime` as entry TTL, never "no expiry"). Not the cookie lifetime (`session.cookie.lifetime`) |
 | `session.regenerate_interval` | `SESSION_REGENERATE_INTERVAL` | int | `0` | Seconds between session-id regenerations; `0` disables |
 | `session.strict_mode` | `SESSION_STRICT_MODE` | bool | `true` | Never adopt a client-chosen session id (fixation protection) |
 | `session.cookie.name` | `SESSION_COOKIE` | string | `''` | Cookie name; empty keeps PHP's `session.name` |
@@ -514,7 +536,7 @@ Package: `ez-php/push`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `push.driver` | `PUSH_DRIVER` | string | `'null'` | Driver: `apns`, `fcm`, `webpush`, `null` |
+| `push.driver` | `PUSH_DRIVER` | string | `'null'` | Driver: `apns`, `fcm`, `webpush`, `array` (in-memory; tests), `null` |
 | `push.apns.private_key` | `PUSH_APNS_PRIVATE_KEY` | string | `''` | APNs `.p8` key contents |
 | `push.apns.key_id` | `PUSH_APNS_KEY_ID` | string | `''` | APNs key ID |
 | `push.apns.team_id` | `PUSH_APNS_TEAM_ID` | string | `''` | Apple team ID |
@@ -579,6 +601,7 @@ A flat list of every variable — useful for generating `.env.example`.
 ```dotenv
 # Application
 APP_NAME=
+APP_ENV=production
 APP_DEBUG=false
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
@@ -593,6 +616,10 @@ DB_USERNAME=
 DB_PASSWORD=
 DB_TESTING_DATABASE=
 
+# Auth JWT (ez-php/auth, JwtServiceProvider)
+JWT_SECRET=
+JWT_TTL=3600
+
 # Cache (ez-php/cache)
 CACHE_DRIVER=array
 CACHE_PATH=
@@ -602,6 +629,8 @@ CACHE_REDIS_DB=0
 CACHE_MEMCACHED_HOST=127.0.0.1
 CACHE_MEMCACHED_PORT=11211
 CACHE_MEMCACHED_WEIGHT=0
+CACHE_DB_TABLE=cache
+CACHE_DB_LOCK_TABLE=cache_locks
 
 # OpenTelemetry (ez-php/otel)
 OTEL_EXPORTER=
@@ -683,12 +712,19 @@ STORAGE_S3_URL_EXPIRY=3600
 STORAGE_S3_MULTIPART_PART_SIZE=8388608
 GCS_BUCKET=
 GCS_ACCESS_TOKEN=
+GCS_CLIENT_EMAIL=
+GCS_PRIVATE_KEY=
+GCS_URL_EXPIRY=3600
 GCS_URL=
+GCS_ENDPOINT=
 
 # Health (ez-php/health) — own HEALTH_REDIS_HOST / HEALTH_REDIS_PORT (in-container, default 127.0.0.1:6379), not the host-published REDIS_PORT
 HEALTH_REDIS_HOST=127.0.0.1
 HEALTH_REDIS_PORT=6379
 HEALTH_OPCACHE_ENABLED=false
+HEALTH_DISK_PATHS=
+HEALTH_DISK_DEGRADED_PERCENT=10
+HEALTH_DISK_UNHEALTHY_PERCENT=5
 
 # Feature Flags (ez-php/feature-flags)
 FLAGS_DRIVER=file
@@ -705,6 +741,7 @@ SESSION_REDIS_HOST=127.0.0.1
 SESSION_REDIS_PORT=6379
 SESSION_REDIS_DATABASE=0
 SESSION_REDIS_TTL=1440
+SESSION_CACHE_PREFIX=session:
 SESSION_IDLE_LIFETIME=
 SESSION_REGENERATE_INTERVAL=0
 SESSION_STRICT_MODE=true
