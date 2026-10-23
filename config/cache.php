@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 return [
+    // array | file | redis | memcached | database | apcu (ext-apcu; CLI needs apc.enable_cli=1)
     'driver' => getenv('CACHE_DRIVER') ?: 'array',
     'file_path' => getenv('CACHE_PATH') ?: sys_get_temp_dir() . '/ez-cache',
+    // Non-empty: every key, lock and tag list is prefixed (stores shared between apps/tenants)
+    'prefix' => getenv('CACHE_PREFIX') ?: '',
     'redis' => [
         'host' => getenv('CACHE_REDIS_HOST') ?: '127.0.0.1',
         'port' => (int) (getenv('CACHE_REDIS_PORT') ?: 6379),

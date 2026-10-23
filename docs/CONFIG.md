@@ -63,8 +63,9 @@ Package: `ez-php/cache`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `cache.driver` | `CACHE_DRIVER` | string | `'array'` | Driver: `array`, `file`, `redis`, `memcached`, `database` |
+| `cache.driver` | `CACHE_DRIVER` | string | `'array'` | Driver: `array`, `file`, `redis`, `memcached`, `database`, `apcu` (ext-apcu; CLI needs `apc.enable_cli=1`) |
 | `cache.file_path` | `CACHE_PATH` | string | `sys_get_temp_dir().'/ez-cache'` | Directory for the file cache driver |
+| `cache.prefix` | `CACHE_PREFIX` | string | `''` | Non-empty: wraps the driver in `PrefixedCache` — every key, lock and tag list gets this prefix (`flush()` still empties the whole store) |
 | `cache.redis.host` | `CACHE_REDIS_HOST` | string | `'127.0.0.1'` | Redis host |
 | `cache.redis.port` | `CACHE_REDIS_PORT` | int | `6379` | Redis port |
 | `cache.redis.database` | `CACHE_REDIS_DB` | int | `0` | Redis database index |
@@ -143,11 +144,13 @@ Package: `ez-php/logging`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `logging.driver` | `LOG_DRIVER` | string | `'file'` | Driver: `file`, `stdout`, `null`, `json`, `stack` |
+| `logging.driver` | `LOG_DRIVER` | string | `'file'` | Driver: `file`, `stdout`, `syslog`, `null`, `json`, `stack` |
 | `logging.path` | `LOG_PATH` | string | `''` | Log directory for the `file` driver (defaults to `storage/logs` when empty) |
 | `logging.max_bytes` | `LOG_MAX_BYTES` | int | `0` | Max file size in bytes before rotation; `0` = no size limit |
 | `logging.min_level` | `LOG_LEVEL` | string | `''` | Minimum level to write: `debug`, `info`, `warning`, `error`, `critical`; empty = all |
-| `logging.json_inner` | `LOG_JSON_INNER` | string | `'stdout'` | Inner driver for the `json` driver: `file`, `stdout`, `null` |
+| `logging.syslog.ident` | `LOG_SYSLOG_IDENT` | string | `'ez-php'` | Program name of `syslog` entries |
+| `logging.syslog.facility` | `LOG_SYSLOG_FACILITY` | string | `'user'` | Syslog facility: `user`, `daemon`, `auth`, `local0` … `local7` |
+| `logging.json_inner` | `LOG_JSON_INNER` | string | `'stdout'` | Inner driver for the `json` driver: `file`, `stdout`, `syslog`, `null` |
 | `logging.stack` | — | array | `['file','stdout']` | Drivers for the `stack` driver; configured in `config/logging.php` directly |
 
 **Driver overview:**
@@ -156,6 +159,7 @@ Package: `ez-php/logging`
 |---|---|
 | `file` | Appends JSON-or-text lines to `LOG_PATH/app-YYYY-MM-DD.log`; date-rotated automatically |
 | `stdout` | `debug`/`info`/`warning` → stdout; `error`/`critical` → stderr |
+| `syslog` | System logger (syslog/journald) via `openlog()`/`syslog()`; level → `LOG_*` priority |
 | `null` | Discards all entries silently (useful in tests and CI) |
 | `json` | Serialises each entry as a JSON object and forwards to `LOG_JSON_INNER` |
 | `stack` | Fans a single call out to multiple drivers listed in `logging.stack` |
@@ -198,7 +202,7 @@ Package: `ez-php/search`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `search.driver` | `SEARCH_DRIVER` | string | `'null'` | Driver: `null`, `meilisearch`, `elasticsearch`, `typesense` |
+| `search.driver` | `SEARCH_DRIVER` | string | `'null'` | Driver: `null`, `meilisearch`, `elasticsearch`, `typesense`, `database` |
 
 **Meilisearch** (`SEARCH_DRIVER=meilisearch`):
 
@@ -221,6 +225,12 @@ Package: `ez-php/search`
 |---|---|---|---|---|
 | `search.typesense.host` | `TYPESENSE_HOST` | string | `'http://typesense:8108'` | Typesense server URL |
 | `search.typesense.key` | `TYPESENSE_KEY` | string | `''` | Typesense API key |
+
+**Database** (`SEARCH_DRIVER=database`) — full-text search on the application's own database (MySQL `FULLTEXT`, SQLite FTS5; resolves `DatabaseInterface`):
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `search.database.table` | `SEARCH_DB_TABLE` | string | `'search_documents'` | Documents table, created on first use; `[A-Za-z0-9_]` only |
 
 ### Storage — `config/storage.php`
 
@@ -660,6 +670,7 @@ CACHE_MEMCACHED_PORT=11211
 CACHE_MEMCACHED_WEIGHT=0
 CACHE_DB_TABLE=cache
 CACHE_DB_LOCK_TABLE=cache_locks
+CACHE_PREFIX=
 
 # OpenTelemetry (ez-php/otel)
 OTEL_EXPORTER=
@@ -706,6 +717,8 @@ LOG_DRIVER=file
 LOG_LEVEL=debug
 LOG_PATH=
 LOG_MAX_BYTES=0
+LOG_SYSLOG_IDENT=ez-php
+LOG_SYSLOG_FACILITY=user
 LOG_JSON_INNER=stdout
 
 # View (ez-php/view)
@@ -727,6 +740,7 @@ ELASTICSEARCH_USER=
 ELASTICSEARCH_PASSWORD=
 TYPESENSE_HOST=http://typesense:8108
 TYPESENSE_KEY=
+SEARCH_DB_TABLE=search_documents
 
 # Storage (ez-php/storage)
 STORAGE_DRIVER=local

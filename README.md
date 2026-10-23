@@ -33,7 +33,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
 | BigNum | `ez-php/bignum` | Arbitrary-precision integers and decimals (BCMath/GMP) |
 | Broadcast | `ez-php/broadcast` | Real-time event broadcasting (SSE) |
-| Cache | `ez-php/cache` | Array, File, Redis, Memcached, Database cache drivers |
+| Cache | `ez-php/cache` | Array, File, Redis, Memcached, Database, APCu cache drivers |
 | DataLoader | `ez-php/dataloader` | Keyed-batch loading and per-key memoization (N+1 prevention) |
 | Event Store | `ez-php/event-store` | Append-only event store with stream replay and projections |
 | Event Store Snapshots | `ez-php/event-store-snapshots` | Snapshots for event-store streams — replay only the events after the latest snapshot |
@@ -49,7 +49,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | JSON Schema | `ez-php/json-schema` | Attribute-driven JSON Schema emission for PHP classes |
 | JSON Schema Validator | `ez-php/json-schema-validator` | Validates JSON payloads against generated schemas, JSON Pointer errors |
 | Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK, Datadog, Loki) for `ez-php/logging` |
-| Logging | `ez-php/logging` | Structured logger, File/Stdout/Null drivers |
+| Logging | `ez-php/logging` | Structured logger, File/Stdout/Syslog/Json/Stack/Null drivers |
 | Mail | `ez-php/mail` | Transactional email, SMTP/Log/Null drivers |
 | Media | `ez-php/media` | Image resizing and file processing via GD/Imagick |
 | Metrics | `ez-php/metrics` | Prometheus metrics endpoint — Counter, Gauge, Histogram |
@@ -67,7 +67,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Queue | `ez-php/queue` | Async job queue, database and Redis drivers |
 | Rate Limiter | `ez-php/rate-limiter` | Rate limiting middleware |
 | Scheduler | `ez-php/scheduler` | Cron-based job scheduler |
-| Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch/Typesense |
+| Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch/Typesense/Database drivers |
 | Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Cache/Array), flash data, id regeneration |
 | SMS | `ez-php/sms` | SMS delivery — Twilio, Vonage, Log and Null drivers |
 | Storage | `ez-php/storage` | File storage abstraction, Local, S3 and GCS drivers |

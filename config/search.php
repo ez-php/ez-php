@@ -17,4 +17,8 @@ return [
         'host' => getenv('TYPESENSE_HOST') ?: 'http://typesense:8108',
         'key' => getenv('TYPESENSE_KEY') ?: '',
     ],
+    // driver = database: MySQL FULLTEXT / SQLite FTS5 on the application database (table auto-created)
+    'database' => [
+        'table' => getenv('SEARCH_DB_TABLE') ?: 'search_documents',
+    ],
 ];
