@@ -21,4 +21,9 @@ return [
         'degraded_percent' => (float) (getenv('HEALTH_DISK_DEGRADED_PERCENT') ?: 10),
         'unhealthy_percent' => (float) (getenv('HEALTH_DISK_UNHEALTHY_PERCENT') ?: 5),
     ],
+    // Raw exception messages of failing probes in the public /health JSON (PDO user/host,
+    // internal URLs). Unset: follow app.debug; failing probes then read "Check failed".
+    'expose_messages' => getenv('HEALTH_EXPOSE_MESSAGES') === false || getenv('HEALTH_EXPOSE_MESSAGES') === ''
+        ? null
+        : filter_var(getenv('HEALTH_EXPOSE_MESSAGES'), FILTER_VALIDATE_BOOLEAN),
 ];

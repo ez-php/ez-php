@@ -325,7 +325,7 @@ return [
 
 ### Health — `config/health.php`
 
-Package: `ez-php/health` — only required when using the Redis, OPcache or disk-space probes.
+Package: `ez-php/health` — only required when using the Redis, OPcache or disk-space probes, or to override `expose_messages`.
 
 ```php
 <?php
@@ -346,6 +346,7 @@ return [
 | `health.disk.paths` | `HEALTH_DISK_PATHS` | list | `[]` | Paths whose filesystem free space is probed (env: comma-separated); one `DiskSpaceProbe` per path, none when empty |
 | `health.disk.degraded_percent` | `HEALTH_DISK_DEGRADED_PERCENT` | float | `10` | Free share (%) below which a disk probe reports DEGRADED |
 | `health.disk.unhealthy_percent` | `HEALTH_DISK_UNHEALTHY_PERCENT` | float | `5` | Free share (%) below which a disk probe reports UNHEALTHY |
+| `health.expose_messages` | `HEALTH_EXPOSE_MESSAGES` | bool\|null | `null` (= `app.debug`) | Show failing probes' raw exception messages in the `/health` JSON; otherwise they read `Degraded` / `Check failed` |
 
 ### Feature Flags — `config/flags.php`
 
