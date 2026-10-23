@@ -417,6 +417,18 @@ The `components` key is omitted from the generated spec while this array is empt
 
 ---
 
+### AsyncAPI — `config/asyncapi.php`
+
+Package: `ez-php/asyncapi`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `asyncapi.endpoint` | `ASYNCAPI_ENDPOINT` | string | `'/asyncapi.json'` | URI the generated AsyncAPI document is served from |
+| `asyncapi.classes` | — | list<class-string> | `[]` | Message classes (with `#[Channel]` + `#[Message]`) to document; nothing else is discovered |
+| `asyncapi.servers` | — | array | `[]` | AsyncAPI Server Objects keyed by name, e.g. `['production' => ['host' => 'ws.example.com', 'protocol' => 'wss']]` |
+
+---
+
 ### OpenTelemetry — `config/otel.php`
 
 Package: `ez-php/otel`
@@ -791,6 +803,9 @@ AI_MEDIA_GEMINI_SPEECH_MODEL=gemini-2.5-flash-preview-tts
 # OpenAPI (ez-php/openapi)
 OPENAPI_ENDPOINT=/openapi.json
 OPENAPI_VERSION=3.0
+
+# AsyncAPI (ez-php/asyncapi)
+ASYNCAPI_ENDPOINT=/asyncapi.json
 
 # AI (ez-php/ai)
 AI_DRIVER=null

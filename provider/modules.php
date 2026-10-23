@@ -14,6 +14,11 @@ return [
     // Requires: composer require ez-php/ai
     // EzPhp\Ai\AiServiceProvider::class,
 
+    // ─── AsyncAPI ────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/asyncapi
+    // Registers GET /asyncapi.json; list message classes in config/asyncapi.php.
+    // EzPhp\AsyncApi\AsyncApiServiceProvider::class,
+
     // ─── Auth ────────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/auth
     // EzPhp\Auth\AuthServiceProvider::class,

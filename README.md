@@ -27,6 +27,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 |---|---|---|
 | AI | `ez-php/ai` | Multi-provider AI client — OpenAI, Anthropic, Gemini, Mistral, Grok drivers |
 | AI Media | `ez-php/ai-media` | Image generation, audio transcription, and text-to-speech — OpenAI/Gemini drivers |
+| AsyncAPI | `ez-php/asyncapi` | AsyncAPI 3.0 documentation for broadcast channels, webhooks and WebSocket messages |
 | Audit | `ez-php/audit` | Event-driven audit log for entity create/update/delete |
 | Auth | `ez-php/auth` | Session and Bearer token authentication |
 | Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
@@ -46,6 +47,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | I18n | `ez-php/i18n` | File-based translator, dot-notation keys |
 | Idempotency | `ez-php/idempotency` | `Idempotency-Key` middleware — safe retries for POST/PATCH/PUT/DELETE |
 | JSON Schema | `ez-php/json-schema` | Attribute-driven JSON Schema emission for PHP classes |
+| JSON Schema Validator | `ez-php/json-schema-validator` | Validates JSON payloads against generated schemas, JSON Pointer errors |
 | Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK, Datadog, Loki) for `ez-php/logging` |
 | Logging | `ez-php/logging` | Structured logger, File/Stdout/Null drivers |
 | Mail | `ez-php/mail` | Transactional email, SMTP/Log/Null drivers |
@@ -59,7 +61,9 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | OpenAPI | `ez-php/openapi` | OpenAPI 3.x spec generation from attributes |
 | ORM | `ez-php/orm` | Data Mapper ORM (entities + repositories), Query Builder, relations |
 | OpenTelemetry | `ez-php/otel` | OpenTelemetry spans and OTLP/HTTP JSON export without a vendor SDK |
+| PSR Bridge | `ez-php/psr-bridge` | PSR-7/PSR-15/PSR-3 adapters for third-party middleware and loggers |
 | Push | `ez-php/push` | Mobile and browser push notifications (APNS, FCM, Web Push) via `ez-php/notification` |
+| QR Code | `ez-php/qrcode` | Dependency-free QR code encoder with SVG and PNG output |
 | Queue | `ez-php/queue` | Async job queue, database and Redis drivers |
 | Rate Limiter | `ez-php/rate-limiter` | Rate limiting middleware |
 | Scheduler | `ez-php/scheduler` | Cron-based job scheduler |
