@@ -20,4 +20,6 @@ return [
     'mailgun_region' => getenv('MAILGUN_REGION') ?: 'us',
     // driver = sendgrid
     'sendgrid_api_key' => getenv('SENDGRID_API_KEY') ?: '',
+    // 'us' or 'eu' (accounts with EU data residency)
+    'sendgrid_region' => getenv('SENDGRID_REGION') ?: 'us',
 ];

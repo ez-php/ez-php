@@ -111,6 +111,7 @@ Package: `ez-php/mail`
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
 | `mail.sendgrid_api_key` | `SENDGRID_API_KEY` | string | — | SendGrid v3 API key |
+| `mail.sendgrid_region` | `SENDGRID_REGION` | string | `'us'` | API region: `us` or `eu` (`api.eu.sendgrid.com`, EU data residency) |
 
 ### Queue — `config/queue.php`
 
@@ -684,6 +685,7 @@ MAILGUN_SECRET=
 MAILGUN_REGION=us
 # SendGrid (MAIL_DRIVER=sendgrid)
 SENDGRID_API_KEY=
+SENDGRID_REGION=us
 
 # Queue (ez-php/queue)
 QUEUE_DRIVER=database

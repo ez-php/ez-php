@@ -12,7 +12,7 @@ ez-php ships two test packages:
 
 | Package | What it provides | Depends on framework? |
 |---|---|---|
-| `ez-php/testing` | `TestResponse`, `EntityFactory` | No |
+| `ez-php/testing` | `TestResponse`, `EntityFactory`, recording fakes (`FakeQueue`, `FakeMailer`, `FakeChannel`, `EventSpy`, `FakeStorage` — see [Fakes](#fakes)) | No |
 | `ez-php/testing-application` | `ApplicationTestCase`, `DatabaseTestCase`, `HttpTestCase` | Yes |
 
 Both are `require-dev` dependencies — the application template includes `ez-php/testing-application` out of the box.
@@ -105,9 +105,9 @@ namespace Tests;
 
 use App\Providers\AppServiceProvider;
 use EzPhp\Application\Application;
-use EzPhp\Routing\Router;
+use EzPhp\Testing\HttpTestCase;
 
-final class UserControllerTest extends ApplicationTestCase
+final class UserControllerTest extends HttpTestCase
 {
     protected function configureApplication(Application $app): void
     {
@@ -319,6 +319,26 @@ $mailer->assertSent(WelcomeMail::class, fn ($m) => $m->getToAddress() === 'a@b.c
 | `FakeStorage` | `StorageInterface` | `assertExists`, `assertMissing`, `assertContents`, `assertEmpty` |
 
 The mail, notification, events and storage fakes need that package installed.
+
+### Fakes behind a façade
+
+Code that calls a static façade (`Mail::send()`, `Notification::send()`, `Sms::send()`, …) reads the instance the façade holds, which is process-wide. When a test swaps in a fake there, it must restore the façade in `tearDown()`, or the fake leaks into every later test:
+
+```php
+protected function setUp(): void
+{
+    parent::setUp();
+    Mail::setMailer($this->mailer = new FakeMailer());
+}
+
+protected function tearDown(): void
+{
+    Mail::resetMailer();
+    parent::tearDown();
+}
+```
+
+Every façade has such a `reset*()` method, named after what it holds (`Cache::resetInstance()`, `Event::resetDispatcher()`, `Sms::resetSender()`, …) — check the façade class you use.
 
 ## Running tests
 

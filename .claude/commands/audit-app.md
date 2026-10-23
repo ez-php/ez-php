@@ -4,7 +4,7 @@ description: Audit this application (scaffolded from the ez-php/ez-php template)
 
 # Audit: Application Structure & Config
 
-Audit this application — scaffolded from the `ez-php/ez-php` template per `NEW_PROJECT.md` — for structural correctness, config completeness, and drift between this project's own `CLAUDE.md` and its actual code. Write all findings to `TODO.md` (create it if it doesn't exist yet).
+Audit this application — scaffolded from the `ez-php/ez-php` template — for structural correctness, config completeness, and drift between this project's own `CLAUDE.md` and its actual code. Write all findings to `TODO.md` (create it if it doesn't exist yet).
 
 This is **not** the monorepo audit suite. `/audit`, `/audit-backend`, `/audit-modules`, `/audit-architecture`, and `/audit-claude` (if present) check a multi-package framework repo — `modules/*/`, `packages.sh`, per-package CI. This application has none of that: it is a single Composer project with `ez-php/framework` and selected `ez-php/*` packages installed as vendor dependencies. Audit what this repo actually contains — `app/`, `config/`, `provider/`, `routes/`, `database/`, `tests/` — not framework/module internals living in `vendor/`.
 
@@ -22,7 +22,7 @@ For each `ez-php/*` package actually in `composer.json` `require`:
 - Every key the config file reads via `getenv()` has a corresponding entry in `.env.example` (and ideally `.env`).
 
 For each `config/*.php` file present:
-- Flag it if the corresponding `ez-php/*` package is **not** in `composer.json` `require` — an unused config file is a claim the application does not honor (see `NEW_PROJECT.md` §4).
+- Flag it if the corresponding `ez-php/*` package is **not** in `composer.json` `require` — an unused config file is a claim the application does not honor (modules are installed with `composer require` and, if they ship a provider, activated in `provider/modules.php`; a config file without its package does nothing).
 
 ### 3. Routes & Controllers
 - Every route handler in `routes/web.php` references a `Controller` class/method that actually exists.
@@ -38,11 +38,11 @@ For each `config/*.php` file present:
 - Each Controller and each custom Middleware has at least one corresponding test.
 
 ### 6. This project's own CLAUDE.md
-- The part before the `---` separator must still read as `CODING_GUIDELINES.md` content (verbatim copy, per `NEW_PROJECT.md` §3) — if a copy of the monorepo's current `CODING_GUIDELINES.md` is available for comparison, diff them; otherwise just check internal consistency (no leftover template-specific wording).
+- The part before the `---` separator must still read as `CODING_GUIDELINES.md` content (a verbatim copy of the monorepo's `CODING_GUIDELINES.md`, followed by `---` and a `# Project: <name>` section) — if a copy of the monorepo's current `CODING_GUIDELINES.md` is available for comparison, diff them; otherwise just check internal consistency (no leftover template-specific wording).
 - The `# Project: <name>` section must accurately reflect reality: **Active modules** matches `composer.json` `require`, **Source structure** matches the actual `app/` tree, **Testing approach** matches what's actually used in `tests/`.
 
 ### 7. Template leftovers not cleaned up
-Per `NEW_PROJECT.md` §2 and the checklist in §7, flag if still present:
+These are left over from the template and must be removed or adapted before the first commit — flag if still present:
 - `CHANGELOG.md`, `cliff.toml` (unless deliberately kept for this project's own releases)
 - `.github/workflows/` still written for the template, not adapted
 - `bin/setup` and the `post-create-project-cmd` script in `composer.json` still present after first setup

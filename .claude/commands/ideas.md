@@ -15,7 +15,7 @@ This is **not** an audit. `/audit-app` finds defects, drift, and structural non-
 
 Ask: "would this be useful in a *different* ez-php application, with no changes beyond configuration?"
 
-- Yes, and no existing `ez-php/*` module covers it (check the monorepo's `CLAUDE.md` module list and `ez-php/docs/CONFIG.md` for what's already installed/available) → `EZ_PHP_IDEAS.md`.
+- Yes, and no existing `ez-php/*` module covers it (check the "Optional Modules" table in `README.md` for every available `ez-php/*` module, `composer.json` `require` for what is installed, and `docs/CONFIG.md` for what each module configures) → `EZ_PHP_IDEAS.md`.
 - Yes, but an existing module already covers it, just not installed or not fully used → this isn't a new idea, it's a `/audit-app` finding (installed-but-unused or missing-config) — skip it here.
 - No, it's tied to this application's specific domain/data model/business rules → `IDEAS.md`.
 
