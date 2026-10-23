@@ -35,6 +35,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Cache | `ez-php/cache` | Array, File, Redis, Memcached, Database cache drivers |
 | DataLoader | `ez-php/dataloader` | Keyed-batch loading and per-key memoization (N+1 prevention) |
 | Event Store | `ez-php/event-store` | Append-only event store with stream replay and projections |
+| Event Store Snapshots | `ez-php/event-store-snapshots` | Snapshots for event-store streams — replay only the events after the latest snapshot |
 | Events | `ez-php/events` | Synchronous event bus |
 | Exchange | `ez-php/exchange` | Currency exchange-rate lookup and conversion for Money |
 | Feature Flags | `ez-php/feature-flags` | Feature flag evaluation, File/Database/Array drivers |

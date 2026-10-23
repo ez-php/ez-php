@@ -107,6 +107,11 @@ return [
     // Needs a bound DatabaseInterface.
     // EzPhp\EventStore\EventStoreServiceProvider::class,
 
+    // ─── Event Store Snapshots ───────────────────────────────────────────────
+    // Requires: composer require ez-php/event-store-snapshots   (builds on ez-php/event-store)
+    // Needs a bound DatabaseInterface.
+    // EzPhp\EventStoreSnapshots\SnapshotServiceProvider::class,
+
     // ─── GraphQL ─────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/graphql
     // Bind a GraphQL\Type\Schema in your own provider and list that provider BEFORE this one.
