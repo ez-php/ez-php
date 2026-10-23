@@ -39,6 +39,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Exchange | `ez-php/exchange` | Currency exchange-rate lookup and conversion for Money |
 | Feature Flags | `ez-php/feature-flags` | Feature flag evaluation, File/Database/Array drivers |
 | GraphQL | `ez-php/graphql` | GraphQL endpoint — schema builder and query executor |
+| GraphQL Subscriptions | `ez-php/graphql-subscriptions` | GraphQL subscriptions over WebSocket (`graphql-transport-ws`), fed by broadcast events |
 | Health | `ez-php/health` | `/health` endpoint with DB, Redis, and Queue probes |
 | HTTP Client | `ez-php/http-client` | Fluent cURL HTTP client |
 | I18n | `ez-php/i18n` | File-based translator, dot-notation keys |
@@ -63,6 +64,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Scheduler | `ez-php/scheduler` | Cron-based job scheduler |
 | Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch/Typesense |
 | Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Cache/Array), flash data, id regeneration |
+| SMS | `ez-php/sms` | SMS delivery — Twilio, Vonage, Log and Null drivers |
 | Storage | `ez-php/storage` | File storage abstraction, Local, S3 and GCS drivers |
 | Support | `ez-php/support` | Utility classes — `Range`, `WeightedRandom`, `DailyQuota`, `CronExpression`, grid/coordinate helpers |
 | Swagger UI | `ez-php/swagger-ui` | Serves Swagger UI / ReDoc docs for the OpenAPI spec |

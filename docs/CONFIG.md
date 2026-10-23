@@ -551,6 +551,22 @@ Package: `ez-php/push`
 
 ---
 
+### SMS — `config/sms.php`
+
+Package: `ez-php/sms`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `sms.driver` | `SMS_DRIVER` | string | `'null'` | Driver: `twilio`, `vonage`, `log`, `array` (in-memory; tests), `null` |
+| `sms.from` | `SMS_FROM` | string | `''` | Default sender number (E.164) or alphanumeric sender ID; required by `twilio`/`vonage` unless every message sets one |
+| `sms.log_path` | `SMS_LOG_PATH` | string | `''` | Log file of the `log` driver; empty writes via `error_log()` |
+| `sms.twilio.sid` | `SMS_TWILIO_SID` | string | `''` | Twilio Account SID |
+| `sms.twilio.token` | `SMS_TWILIO_TOKEN` | string | `''` | Twilio Auth Token |
+| `sms.vonage.key` | `SMS_VONAGE_KEY` | string | `''` | Vonage API key |
+| `sms.vonage.secret` | `SMS_VONAGE_SECRET` | string | `''` | Vonage API secret |
+
+---
+
 ### Metrics — `config/metrics.php`
 
 Package: `ez-php/metrics`
@@ -819,6 +835,15 @@ PUSH_FCM_CLIENT_EMAIL=
 PUSH_WEBPUSH_PRIVATE_KEY=
 PUSH_WEBPUSH_SUBJECT=
 PUSH_WEBPUSH_TTL=86400
+
+# SMS (ez-php/sms)
+SMS_DRIVER=null
+SMS_FROM=
+SMS_LOG_PATH=
+SMS_TWILIO_SID=
+SMS_TWILIO_TOKEN=
+SMS_VONAGE_KEY=
+SMS_VONAGE_SECRET=
 
 # Metrics (ez-php/metrics) — empty disables the auto-registered route
 METRICS_ENDPOINT=/metrics

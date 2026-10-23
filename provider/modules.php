@@ -135,6 +135,11 @@ return [
     // Register HttpClientServiceProvider before it (the apns/fcm drivers resolve HttpClient).
     // EzPhp\Push\PushServiceProvider::class,
 
+    // ─── SMS ─────────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/sms
+    // Register HttpClientServiceProvider before it (the twilio/vonage drivers resolve HttpClient).
+    // EzPhp\Sms\SmsServiceProvider::class,
+
     // ─── Swagger UI ──────────────────────────────────────────────────────────
     // Requires: composer require ez-php/swagger-ui
     // Serves documentation for the spec produced by ez-php/openapi.
