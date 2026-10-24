@@ -34,12 +34,12 @@ services:
       - "${MAIL_PORT:-1025}:1025"
 
   # meilisearch:
-  #   # Host port 7700 is also the monorepo root stack's Meilisearch port — set
-  #   # MEILISEARCH_PORT in .env to a free port if both stacks run at once.
+  #   # Host port MEILISEARCH_PORT (7702, allocated in the monorepo's host-port
+  #   # table so it never collides with the root stack's 7700).
   #   image: getmeili/meilisearch:v1.13
   #   container_name: ez-php-template-meilisearch
   #   ports:
-  #     - "${MEILISEARCH_PORT:-7700}:7700"
+  #     - "${MEILISEARCH_PORT:-7702}:7700"
   #   environment:
   #     MEILI_MASTER_KEY: "${MEILISEARCH_KEY:-}"
   #     MEILI_NO_ANALYTICS: "true"

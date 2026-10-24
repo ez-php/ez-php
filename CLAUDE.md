@@ -232,7 +232,7 @@ After scaffolding:
 |---|---|---|---|
 | root (`ez-php-project`) | 3306 | 6379 (`REDIS_PORT`) | 7700 |
 | `ez-php/framework` | 3307 | — | — |
-| `ez-php/` (application template) | 3308 | 6383 (`REDIS_PORT`) | — |
+| `ez-php/` (application template) | 3308 | 6383 (`REDIS_PORT`) | 7702 (opt-in service) |
 | `ez-php/orm` | 3309 | — | — |
 | `ez-php/cache` | — | 6380 (`REDIS_HOST_PORT`) | — |
 | `ez-php/queue` | 3310 | 6381 (`REDIS_HOST_PORT`) | — |
@@ -245,7 +245,7 @@ After scaffolding:
 | `ez-php/session` | — | 6387 (`REDIS_HOST_PORT`) | — |
 | `ez-php/metrics` | — | 6388 (`REDIS_HOST_PORT`) | — |
 | `ez-php/event-store-snapshots` | 3312 | — | — |
-| **next free** | **3313** | **6389** | **7702** |
+| **next free** | **3313** | **6389** | **7703** |
 
 Only set a port for services the module actually uses. Modules without external services need no port config.
 
@@ -296,7 +296,7 @@ ez-php/
 │   ├── events.php              — Event class → listener class map (not env-backed)
 │   ├── flags.php               — Feature flag driver and definitions-file path (env-backed; the definitions themselves live in ../flags.php)
 │   ├── graphql.php             — GraphQL endpoint, query depth/complexity limits, persisted queries (env-backed)
-│   ├── health.php              — Redis probe connection for /health (env-backed)
+│   ├── health.php              — /health probes: Redis connection, OPcache, disk paths/thresholds, expose_messages (env-backed)
 │   ├── mail.php                — Mail driver, SMTP connection, sender defaults (env-backed)
 │   ├── media.php               — Image processing driver: gd or imagick (env-backed)
 │   ├── metrics.php             — Metrics endpoint path, storage (memory/redis), name prefix, Redis connection (env-backed)
@@ -547,8 +547,12 @@ Not env-backed — maps event class-strings to arrays of listener class-strings.
 
 | Key | Env var | Default |
 |---|---|---|
-| `redis.host` | `REDIS_HOST` | `'127.0.0.1'` |
-| `redis.port` | `REDIS_PORT` | `6379` |
+| `redis.host` | `HEALTH_REDIS_HOST` | `'127.0.0.1'` |
+| `redis.port` | `HEALTH_REDIS_PORT` | `6379` |
+| `opcache.enabled` | `HEALTH_OPCACHE_ENABLED` | `false` |
+| `disk.paths` | `HEALTH_DISK_PATHS` | `[]` (comma-separated) |
+| `disk.degraded_percent` / `disk.unhealthy_percent` | `HEALTH_DISK_DEGRADED_PERCENT` / `HEALTH_DISK_UNHEALTHY_PERCENT` | `10` / `5` |
+| `expose_messages` | `HEALTH_EXPOSE_MESSAGES` | `null` (= `app.debug`) |
 
 ### `config/flags.php`
 
