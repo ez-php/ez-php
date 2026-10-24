@@ -138,6 +138,21 @@ Package: `ez-php/rate-limiter`
 | `rate_limiter.redis.database` | `RATE_LIMITER_REDIS_DB` | int | `0` | Redis database index |
 | `rate_limiter.trusted_proxies` | `RATE_LIMITER_TRUSTED_PROXIES` | string\|list | `''` | Reverse-proxy IPs (comma-separated) whose `X-Forwarded-For` `ThrottleMiddleware` honours |
 
+### Scheduler — `config/scheduler.php`
+
+Package: `ez-php/scheduler`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `scheduler.mutex` | `SCHEDULER_MUTEX` | string | `'file'` | Mutex for `withoutOverlapping()` entries: `file`, `database`, `database_expiry`, `redis`, `cache` (needs a bound `ez-php/cache` `CacheInterface`), `none` |
+| `scheduler.ttl` | `SCHEDULER_TTL` | int | `3600` | Lock lifetime in seconds (`database_expiry`, `redis`, `cache`) |
+| `scheduler.file.path` | `SCHEDULER_LOCK_PATH` | string | `sys_get_temp_dir().'/ez-scheduler-locks'` | Lock-file directory (`file` mutex) |
+| `scheduler.redis.host` | `SCHEDULER_REDIS_HOST` | string | `'127.0.0.1'` | Redis host (`redis` mutex) |
+| `scheduler.redis.port` | `SCHEDULER_REDIS_PORT` | int | `6379` | Redis port |
+| `scheduler.redis.database` | `SCHEDULER_REDIS_DB` | int | `0` | Redis database index |
+
+Entries are registered by the application (`$app->make(Scheduler::class)->command(...)` in a provider's `boot()`); run `php ez scheduler:run` every minute from cron.
+
 ### Logging — `config/logging.php`
 
 Package: `ez-php/logging`
@@ -712,6 +727,14 @@ RATE_LIMITER_REDIS_HOST=127.0.0.1
 RATE_LIMITER_REDIS_PORT=6379
 RATE_LIMITER_REDIS_DB=0
 RATE_LIMITER_TRUSTED_PROXIES=
+
+# Scheduler (ez-php/scheduler)
+SCHEDULER_MUTEX=file
+SCHEDULER_TTL=3600
+SCHEDULER_LOCK_PATH=
+SCHEDULER_REDIS_HOST=127.0.0.1
+SCHEDULER_REDIS_PORT=6379
+SCHEDULER_REDIS_DB=0
 
 # Logging (ez-php/logging)
 LOG_DRIVER=file

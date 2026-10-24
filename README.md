@@ -29,34 +29,34 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | AI Media | `ez-php/ai-media` | Image generation, audio transcription, and text-to-speech — OpenAI/Gemini drivers |
 | AsyncAPI | `ez-php/asyncapi` | AsyncAPI 3.0 documentation for broadcast channels, webhooks and WebSocket messages |
 | Audit | `ez-php/audit` | Event-driven audit log for entity create/update/delete |
-| Auth | `ez-php/auth` | Session and Bearer token authentication |
+| Auth | `ez-php/auth` | Session, Bearer token, JWT and personal access token authentication |
 | Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
 | BigNum | `ez-php/bignum` | Arbitrary-precision integers and decimals (BCMath/GMP) |
-| Broadcast | `ez-php/broadcast` | Real-time event broadcasting (SSE) |
+| Broadcast | `ez-php/broadcast` | Real-time event broadcasting, Null/Log/Redis/Array/WebSocket drivers (SSE responses via `ez-php/http`) |
 | Cache | `ez-php/cache` | Array, File, Redis, Memcached, Database, APCu cache drivers |
 | DataLoader | `ez-php/dataloader` | Keyed-batch loading and per-key memoization (N+1 prevention) |
 | Event Store | `ez-php/event-store` | Append-only event store with stream replay and projections |
 | Event Store Snapshots | `ez-php/event-store-snapshots` | Snapshots for event-store streams — replay only the events after the latest snapshot |
 | Events | `ez-php/events` | Synchronous event bus |
 | Exchange | `ez-php/exchange` | Currency exchange-rate lookup and conversion for Money |
-| Feature Flags | `ez-php/feature-flags` | Feature flag evaluation, File/Database/Array drivers |
+| Feature Flags | `ez-php/feature-flags` | Feature flag evaluation, File/Database/Redis/Array/Rollout drivers |
 | GraphQL | `ez-php/graphql` | GraphQL endpoint — schema builder and query executor |
 | GraphQL Subscriptions | `ez-php/graphql-subscriptions` | GraphQL subscriptions over WebSocket (`graphql-transport-ws`), fed by broadcast events |
-| Health | `ez-php/health` | `/health` endpoint with DB, Redis, and Queue probes |
+| Health | `ez-php/health` | `/health` endpoint with DB, Redis, Queue, RedisQueue, OPcache and disk-space probes (plus opt-in cache and HTTP probes) |
 | HTTP Client | `ez-php/http-client` | Fluent cURL HTTP client |
 | I18n | `ez-php/i18n` | File-based translator, dot-notation keys |
 | Idempotency | `ez-php/idempotency` | `Idempotency-Key` middleware — safe retries for POST/PATCH/PUT/DELETE |
 | JSON Schema | `ez-php/json-schema` | Attribute-driven JSON Schema emission for PHP classes |
 | JSON Schema Validator | `ez-php/json-schema-validator` | Validates JSON payloads against generated schemas, JSON Pointer errors |
-| Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK, Datadog, Loki) for `ez-php/logging` |
-| Logging | `ez-php/logging` | Structured logger, File/Stdout/Syslog/Json/Stack/Null drivers |
-| Mail | `ez-php/mail` | Transactional email, SMTP/Log/Null drivers |
+| Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK/NDJSON, Datadog, Loki, New Relic, Splunk HEC, Graylog GELF) for `ez-php/logging` |
+| Logging | `ez-php/logging` | Structured logger, File/Stdout/Syslog/Json/Stack/MinLevel/Null drivers |
+| Mail | `ez-php/mail` | Transactional email, SMTP/Mailgun/SendGrid/Log/Null drivers |
 | Media | `ez-php/media` | Image resizing and file processing via GD/Imagick |
 | Metrics | `ez-php/metrics` | Prometheus metrics endpoint — Counter, Gauge, Histogram |
 | Metrics StatsD | `ez-php/metrics-statsd` | StatsD/UDP exporter for `ez-php/metrics` |
 | Money | `ez-php/money` | Immutable Money/Currency value objects, allocation, formatting |
-| Notification | `ez-php/notification` | Multi-channel notifications (mail, broadcast, database) |
-| OAuth | `ez-php/oauth` | OAuth2/SSO client flows — authorization code flow with PKCE and state |
+| Notification | `ez-php/notification` | Multi-channel notifications (mail, broadcast, database, push, sms, webhook channels) |
+| OAuth | `ez-php/oauth` | OAuth2/SSO client flows — authorization code flow with PKCE and state, OpenID Connect ID token validation |
 | OPcache | `ez-php/opcache` | OPcache preload script generation |
 | OpenAPI | `ez-php/openapi` | OpenAPI 3.x spec generation from attributes |
 | ORM | `ez-php/orm` | Data Mapper ORM (entities + repositories), Query Builder, relations |
@@ -65,7 +65,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Push | `ez-php/push` | Mobile and browser push notifications (APNS, FCM, Web Push) via `ez-php/notification` |
 | QR Code | `ez-php/qrcode` | Dependency-free QR code encoder with SVG and PNG output |
 | Queue | `ez-php/queue` | Async job queue, database and Redis drivers |
-| Rate Limiter | `ez-php/rate-limiter` | Rate limiting middleware |
+| Rate Limiter | `ez-php/rate-limiter` | Rate limiting, Array/File/Redis/SlidingWindowRedis/Cache drivers, `ThrottleMiddleware` |
 | Scheduler | `ez-php/scheduler` | Cron-based job scheduler |
 | Search | `ez-php/search` | Full-text search, Meilisearch/Elasticsearch/Typesense/Database drivers |
 | Session | `ez-php/session` | Session handler drivers (File/Database/Redis/Cache/Array), flash data, id regeneration |

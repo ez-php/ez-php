@@ -307,6 +307,7 @@ ez-php/
 │   ├── queue.php                — Queue driver and Redis connection (env-backed)
 │   ├── logging.php             — Log driver, path, level, JSON inner driver (env-backed)
 │   ├── rate_limiter.php        — Rate limiter driver and Redis connection (env-backed)
+│   ├── scheduler.php           — Scheduler overlap mutex (file/database/database_expiry/redis/cache/none), TTL, lock path, Redis connection (env-backed)
 │   ├── search.php              — Search driver, Meilisearch/Elasticsearch connection (env-backed)
 │   ├── security.php            — SecurityHeadersMiddleware header overrides (`headers`; not env-backed)
 │   ├── session.php             — Session driver (file/database/redis), regeneration, strict mode, cookie (env-backed)

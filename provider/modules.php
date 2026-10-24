@@ -66,8 +66,8 @@ return [
 
     // ─── Scheduler ───────────────────────────────────────────────────────────
     // Requires: composer require ez-php/scheduler
-    // Note: register manually — Scheduler has no ServiceProvider.
-    // See modules/scheduler/README.md for setup instructions.
+    // Registers scheduler:run / scheduler:list; add entries in your own provider's boot()
+    // EzPhp\Scheduler\SchedulerServiceProvider::class,
 
     // ─── Search ──────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/search

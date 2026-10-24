@@ -233,24 +233,35 @@ $user = User::find(1);
 $posts = $user->posts; // triggers a query
 
 // Data Mapper (explicit eager loading)
-$user = $userRepo->query()->with('posts')->find(1);
-$posts = $user->posts; // already loaded
+$users = $userRepo->query()->with('posts')->where('id', 1)->get(); // get() resolves with(); first() does not
+$posts = $users[0]->posts; // already loaded
+
+// or lazily, for one entity
+$posts = $userRepo->posts($user)->getResults();
 ```
 
-Define relations in the repository:
+Define relations as public repository methods that take the owning entity — `with('posts')` calls
+`$userRepo->posts($entity)`. Each helper receives the related repository *instance*, the key columns
+and the owner's key value:
 
 ```php
-class UserRepository extends AbstractRepository
+final class UserRepository extends AbstractRepository
 {
+    public function __construct(private readonly PostRepository $posts, ?DatabaseInterface $db = null)
+    {
+        parent::__construct($db);
+    }
+
     protected function entityClass(): string
     {
         return User::class;
     }
 
     /** @return EntityHasMany<Post> */
-    protected function posts(): EntityHasMany
+    public function posts(User $user): EntityHasMany
     {
-        return $this->hasMany(PostRepository::class, Post::class, 'user_id');
+        // FK on the post, PK on the user, the user's PK value
+        return $this->hasMany($this->posts, 'user_id', 'id', $user->getAttribute('id'));
     }
 }
 ```
