@@ -59,8 +59,8 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | OAuth | `ez-php/oauth` | OAuth2/SSO client flows — authorization code flow with PKCE and state, OpenID Connect ID token validation |
 | OPcache | `ez-php/opcache` | OPcache preload script generation |
 | OpenAPI | `ez-php/openapi` | OpenAPI 3.x spec generation from attributes |
-| ORM | `ez-php/orm` | Data Mapper ORM (entities + repositories), Query Builder, relations |
-| OpenTelemetry | `ez-php/otel` | OpenTelemetry spans and OTLP/HTTP JSON export without a vendor SDK |
+| ORM | `ez-php/orm` | Data Mapper ORM (entities + repositories), Query Builder, relations, keyset iteration |
+| OpenTelemetry | `ez-php/otel` | OpenTelemetry spans and OTLP/HTTP JSON export without a vendor SDK; HTTP, database, log and queue tracing |
 | PSR Bridge | `ez-php/psr-bridge` | PSR-7/PSR-15/PSR-3 adapters for third-party middleware and loggers |
 | Push | `ez-php/push` | Mobile and browser push notifications (APNS, FCM, Web Push) via `ez-php/notification` |
 | QR Code | `ez-php/qrcode` | Dependency-free QR code encoder with SVG and PNG output |
@@ -80,8 +80,8 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | WebAuthn | `ez-php/webauthn` | WebAuthn / FIDO2 passkey authentication — registration and assertion ceremonies, attestation verification |
 | WebAuthn Metadata | `ez-php/webauthn-metadata` | FIDO MDS trust-anchor lookups for WebAuthn — blob download, JWT verification, attestation chain trust decisions |
 | Webhook | `ez-php/webhook` | Outgoing webhooks — HMAC-signed delivery as a retrying queue job, plus incoming signature verification middleware |
-| WebSocket | `ez-php/websocket` | RFC 6455 WebSocket server (Fiber-based) |
-| WebSocket Client | `ez-php/websocket-client` | RFC 6455 WebSocket client — `ws://` and `wss://`, blocking API |
+| WebSocket | `ez-php/websocket` | RFC 6455 WebSocket server (Fiber-based), opt-in permessage-deflate |
+| WebSocket Client | `ez-php/websocket-client` | RFC 6455 WebSocket client — `ws://` and `wss://`, blocking API, opt-in permessage-deflate |
 | WebSocket TLS | `ez-php/websocket-tls` | TLS/WSS termination for `ez-php/websocket` |
 
 Example:
