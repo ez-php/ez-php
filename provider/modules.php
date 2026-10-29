@@ -19,6 +19,11 @@ return [
     // Registers GET /asyncapi.json; list message classes in config/asyncapi.php.
     // EzPhp\AsyncApi\AsyncApiServiceProvider::class,
 
+    // ─── AsyncAPI UI ─────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/asyncapi-ui
+    // Serves an HTML viewer (GET /asyncapi-docs) for the document produced by ez-php/asyncapi.
+    // EzPhp\AsyncApiUi\AsyncApiUiServiceProvider::class,
+
     // ─── Auth ────────────────────────────────────────────────────────────────
     // Requires: composer require ez-php/auth
     // EzPhp\Auth\AuthServiceProvider::class,
@@ -131,6 +136,11 @@ return [
     // Registers GET /metrics (path: metrics.endpoint in config/metrics.php; empty disables it).
     // EzPhp\Metrics\MetricsServiceProvider::class,
 
+    // ─── Metrics OTLP export ─────────────────────────────────────────────────
+    // Requires: composer require ez-php/metrics-otlp   (builds on ez-php/metrics)
+    // Register after MetricsServiceProvider; set METRICS_OTLP_ENDPOINT to enable the export.
+    // EzPhp\MetricsOtlp\MetricsOtlpServiceProvider::class,
+
     // ─── OPcache preloading ──────────────────────────────────────────────────
     // Requires: composer require ez-php/opcache
     // EzPhp\OPCache\PreloaderServiceProvider::class,
@@ -174,6 +184,21 @@ return [
     // ─── AI media (images, transcription, speech) ────────────────────────────
     // Requires: composer require ez-php/ai-media   (builds on ez-php/http-client)
     // EzPhp\AiMedia\AiMediaServiceProvider::class,
+
+    // ─── Encryption ──────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/encryption
+    // Set ENCRYPTION_KEY (ez encryption:key); add EncryptedCookieMiddleware as global middleware to encrypt cookies.
+    // EzPhp\Encryption\EncryptionServiceProvider::class,
+
+    // ─── Tenancy ─────────────────────────────────────────────────────────────
+    // Requires: composer require ez-php/tenancy
+    // Configure tenants and the resolver in config/tenancy.php; add ResolveTenantMiddleware as global middleware.
+    // EzPhp\Tenancy\TenancyServiceProvider::class,
+
+    // ─── Mail events (delivery webhooks) ─────────────────────────────────────
+    // Requires: composer require ez-php/mail-events   (builds on ez-php/events)
+    // Register EventServiceProvider before it; set the Mailgun/SendGrid keys in config/mail_events.php.
+    // EzPhp\MailEvents\MailEventsServiceProvider::class,
 
     // ─── Application providers ────────────────────────────────────────────────
     AppServiceProvider::class,

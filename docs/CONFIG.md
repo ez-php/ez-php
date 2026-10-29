@@ -477,6 +477,19 @@ Package: `ez-php/asyncapi`
 
 ---
 
+### AsyncAPI UI — `config/asyncapi-ui.php`
+
+Package: `ez-php/asyncapi-ui`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `asyncapi-ui.endpoint` | `ASYNCAPI_UI_ENDPOINT` | string | `'/asyncapi-docs'` | Path of the viewer page; empty registers no route |
+| `asyncapi-ui.document_url` | `ASYNCAPI_UI_DOCUMENT_URL` | string | `''` | URL the page loads the AsyncAPI document from; empty uses `asyncapi.endpoint`, else `/asyncapi.json` |
+
+The page title comes from `app.name`.
+
+---
+
 ### OpenTelemetry — `config/otel.php`
 
 Package: `ez-php/otel`
@@ -611,6 +624,49 @@ Package: `ez-php/push`
 
 ---
 
+### Encryption — `config/encryption.php`
+
+Package: `ez-php/encryption`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `encryption.key` | `ENCRYPTION_KEY` | string | `''` | Current key, `base64:` + 32 random bytes (`ez encryption:key`); required on first encrypt/decrypt |
+| `encryption.previous_keys` | `ENCRYPTION_PREVIOUS_KEYS` | list\|string | `''` | Decrypt-only keys after a rotation, comma-separated |
+| `encryption.cookie_except` | — | list | `['XSRF-TOKEN']` | Cookies `EncryptedCookieMiddleware` leaves unencrypted (JavaScript-readable ones) |
+
+---
+
+### Tenancy — `config/tenancy.php`
+
+Package: `ez-php/tenancy`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `tenancy.resolver` | `TENANCY_RESOLVER` | string | `'subdomain'` | `subdomain`, `host`, `header`, `path`, or a comma-separated chain tried in order |
+| `tenancy.base_domain` | `TENANCY_BASE_DOMAIN` | string | `''` | Base domain of the `subdomain` resolver (`acme.example.com` → `acme`); required by it |
+| `tenancy.hosts` | — | map | `[]` | Host → tenant id for the `host` resolver (custom domains) |
+| `tenancy.header` | `TENANCY_HEADER` | string | `'X-Tenant'` | Header of the `header` resolver |
+| `tenancy.path_segment` | `TENANCY_PATH_SEGMENT` | int | `0` | Zero-based path segment of the `path` resolver |
+| `tenancy.required` | `TENANCY_REQUIRED` | bool | `true` | `ResolveTenantMiddleware` answers 404 when no known tenant resolves; `false` continues without one |
+| `tenancy.tenants` | — | map | `[]` | Tenant id → attributes for `ArrayTenantStore`; ids are DNS labels (`[a-z0-9-]`, 1–63) |
+| `tenancy.cache_prefix` | `TENANCY_CACHE_PREFIX` | string | `'tenant:'` | `TenantScopedCache` key prefix, followed by `<id>:` |
+
+---
+
+### Mail Events — `config/mail_events.php`
+
+Package: `ez-php/mail-events`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `mail_events.tolerance` | `MAIL_EVENTS_TOLERANCE` | int | `300` | Max. age (and clock skew) of a webhook timestamp in seconds — older requests are rejected (replay protection) |
+| `mail_events.mailgun.signing_key` | `MAIL_EVENTS_MAILGUN_SIGNING_KEY` | string | `''` | Mailgun "HTTP webhook signing key"; empty registers no Mailgun route |
+| `mail_events.mailgun.path` | `MAIL_EVENTS_MAILGUN_PATH` | string | `'/webhooks/mail/mailgun'` | Route path; empty registers no route |
+| `mail_events.sendgrid.public_key` | `MAIL_EVENTS_SENDGRID_PUBLIC_KEY` | string | `''` | SendGrid Signed Event Webhook verification key (base64 as shown by SendGrid, or PEM); empty registers no SendGrid route |
+| `mail_events.sendgrid.path` | `MAIL_EVENTS_SENDGRID_PATH` | string | `'/webhooks/mail/sendgrid'` | Route path; empty registers no route |
+
+---
+
 ### SMS — `config/sms.php`
 
 Package: `ez-php/sms`
@@ -640,6 +696,23 @@ Package: `ez-php/metrics`
 
 The endpoint is unprotected. To put it behind middleware, set `METRICS_ENDPOINT=` (empty) and
 register the route yourself, e.g. `$router->get('/metrics', [MetricsController::class, '__invoke'])->middleware(...)`.
+
+---
+
+### Metrics OTLP — `config/metrics_otlp.php`
+
+Package: `ez-php/metrics-otlp`
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `metrics_otlp.endpoint` | `METRICS_OTLP_ENDPOINT` | string | `''` | OTLP/HTTP metrics URL, e.g. `http://otel-collector:4318/v1/metrics`; empty disables the export |
+| `metrics_otlp.service_name` | `METRICS_OTLP_SERVICE_NAME` | string | `''` | `service.name` resource attribute; empty uses `app.name`, else `ez-php-app` |
+| `metrics_otlp.headers` | `METRICS_OTLP_HEADERS` | string | `''` | Extra request headers as `key=value,key2=value2` (URL-encoded values, as `OTEL_EXPORTER_OTLP_HEADERS`) |
+| `metrics_otlp.max_points` | `METRICS_OTLP_MAX_POINTS` | int | `1000` | Export once this many values are waiting; the rest goes at process end |
+| `metrics_otlp.timeout` | `METRICS_OTLP_TIMEOUT` | int | `5` | HTTP timeout in seconds |
+
+Delta temporality: each export carries only what was recorded since the previous one. Collectors that
+export to Prometheus need the `deltatocumulative` processor.
 
 ---
 
@@ -734,6 +807,13 @@ MAILGUN_REGION=us
 # SendGrid (MAIL_DRIVER=sendgrid)
 SENDGRID_API_KEY=
 SENDGRID_REGION=us
+
+# Mail Events (ez-php/mail-events)
+MAIL_EVENTS_TOLERANCE=300
+MAIL_EVENTS_MAILGUN_SIGNING_KEY=
+MAIL_EVENTS_MAILGUN_PATH=/webhooks/mail/mailgun
+MAIL_EVENTS_SENDGRID_PUBLIC_KEY=
+MAIL_EVENTS_SENDGRID_PATH=/webhooks/mail/sendgrid
 
 # Queue (ez-php/queue)
 QUEUE_DRIVER=database
@@ -870,6 +950,10 @@ OPENAPI_VERSION=3.0
 # AsyncAPI (ez-php/asyncapi)
 ASYNCAPI_ENDPOINT=/asyncapi.json
 
+# AsyncAPI UI (ez-php/asyncapi-ui)
+ASYNCAPI_UI_ENDPOINT=/asyncapi-docs
+ASYNCAPI_UI_DOCUMENT_URL=
+
 # AI (ez-php/ai)
 AI_DRIVER=null
 AI_EMBEDDING_DRIVER=null
@@ -914,6 +998,18 @@ PUSH_WEBPUSH_PRIVATE_KEY=
 PUSH_WEBPUSH_SUBJECT=
 PUSH_WEBPUSH_TTL=86400
 
+# Encryption (ez-php/encryption)
+ENCRYPTION_KEY=
+ENCRYPTION_PREVIOUS_KEYS=
+
+# Tenancy (ez-php/tenancy)
+TENANCY_RESOLVER=subdomain
+TENANCY_BASE_DOMAIN=
+TENANCY_HEADER=X-Tenant
+TENANCY_PATH_SEGMENT=0
+TENANCY_REQUIRED=true
+TENANCY_CACHE_PREFIX=tenant:
+
 # SMS (ez-php/sms)
 SMS_DRIVER=null
 SMS_FROM=
@@ -930,6 +1026,13 @@ METRICS_PREFIX=ez-php:metrics:
 METRICS_REDIS_HOST=127.0.0.1
 METRICS_REDIS_PORT=6379
 METRICS_REDIS_DB=0
+
+# Metrics OTLP export (ez-php/metrics-otlp) — empty endpoint disables it
+METRICS_OTLP_ENDPOINT=
+METRICS_OTLP_SERVICE_NAME=
+METRICS_OTLP_HEADERS=
+METRICS_OTLP_MAX_POINTS=1000
+METRICS_OTLP_TIMEOUT=5
 
 # OPcache preloading (ez-php/opcache)
 OPCACHE_PRELOAD_FILE=

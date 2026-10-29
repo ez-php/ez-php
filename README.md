@@ -28,6 +28,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | AI | `ez-php/ai` | Multi-provider AI client — OpenAI, Anthropic, Gemini, Mistral, Grok drivers |
 | AI Media | `ez-php/ai-media` | Image generation, audio transcription, and text-to-speech — OpenAI/Gemini drivers |
 | AsyncAPI | `ez-php/asyncapi` | AsyncAPI 3.0 documentation for broadcast channels, webhooks and WebSocket messages |
+| AsyncAPI UI | `ez-php/asyncapi-ui` | HTML viewer for the AsyncAPI document (AsyncAPI React component from a CDN) |
 | Audit | `ez-php/audit` | Event-driven audit log for entity create/update/delete |
 | Auth | `ez-php/auth` | Session, Bearer token, JWT and personal access token authentication |
 | Authorization | `ez-php/authorization` | Gate and policy based authorization — abilities, policies, `CanMiddleware` |
@@ -35,6 +36,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Broadcast | `ez-php/broadcast` | Real-time event broadcasting, Null/Log/Redis/Array/WebSocket drivers (SSE responses via `ez-php/http`) |
 | Cache | `ez-php/cache` | Array, File, Redis, Memcached, Database, APCu cache drivers |
 | DataLoader | `ez-php/dataloader` | Keyed-batch loading and per-key memoization (N+1 prevention) |
+| Encryption | `ez-php/encryption` | Authenticated encryption with key rotation, encrypted cookies, ORM cast |
 | Event Store | `ez-php/event-store` | Append-only event store with stream replay and projections |
 | Event Store Snapshots | `ez-php/event-store-snapshots` | Snapshots for event-store streams — replay only the events after the latest snapshot |
 | Events | `ez-php/events` | Synchronous event bus |
@@ -51,8 +53,10 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK/NDJSON, Datadog, Loki, New Relic, Splunk HEC, Graylog GELF) for `ez-php/logging` |
 | Logging | `ez-php/logging` | Structured logger, File/Stdout/Syslog/Json/Stack/MinLevel/Null drivers |
 | Mail | `ez-php/mail` | Transactional email, SMTP/Mailgun/SendGrid/Log/Null drivers |
+| Mail Events | `ez-php/mail-events` | Mailgun/SendGrid delivery webhooks (bounces, complaints, opens, clicks) as events |
 | Media | `ez-php/media` | Image resizing and file processing via GD/Imagick |
 | Metrics | `ez-php/metrics` | Prometheus metrics endpoint — Counter, Gauge, Histogram |
+| Metrics OTLP | `ez-php/metrics-otlp` | OTLP/HTTP exporter for `ez-php/metrics` to an OpenTelemetry collector |
 | Metrics StatsD | `ez-php/metrics-statsd` | StatsD/UDP exporter for `ez-php/metrics` |
 | Money | `ez-php/money` | Immutable Money/Currency value objects, allocation, formatting |
 | Notification | `ez-php/notification` | Multi-channel notifications (mail, broadcast, database, push, sms, webhook channels) |
@@ -73,6 +77,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Storage | `ez-php/storage` | File storage abstraction, Local, S3 and GCS drivers |
 | Support | `ez-php/support` | Utility classes — `Range`, `WeightedRandom`, `DailyQuota`, `CronExpression`, grid/coordinate helpers |
 | Swagger UI | `ez-php/swagger-ui` | Serves Swagger UI / ReDoc docs for the OpenAPI spec |
+| Tenancy | `ez-php/tenancy` | Single-database multi-tenancy — tenant resolution, tenant-scoped cache and search |
 | Two-Factor | `ez-php/two-factor` | TOTP two-factor authentication, backup codes |
 | Validation | `ez-php/validation` | Rule-based input validation |
 | View | `ez-php/view` | PHP template engine, layouts, sections |
