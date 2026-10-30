@@ -26,4 +26,7 @@ return [
      * flag for that name. Example: 'new-checkout' => 25
      */
     'rollouts' => [],
+
+    // Seconds a flag answer is cached through ez-php/cache (CachedDriver); 0 = no cache.
+    'cache_ttl' => (int) (getenv('FLAGS_CACHE_TTL') ?: 0),
 ];

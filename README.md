@@ -53,7 +53,7 @@ Every ez-php module except the framework's own plumbing (`contracts`, `console`,
 | Log Transport | `ez-php/log-transport` | Async/remote log shipping (ELK/NDJSON, Datadog, Loki, New Relic, Splunk HEC, Graylog GELF) for `ez-php/logging` |
 | Logging | `ez-php/logging` | Structured logger, File/Stdout/Syslog/Json/Stack/MinLevel/Null drivers |
 | Mail | `ez-php/mail` | Transactional email, SMTP/Mailgun/SendGrid/Log/Null drivers |
-| Mail Events | `ez-php/mail-events` | Mailgun/SendGrid delivery webhooks (bounces, complaints, opens, clicks) as events |
+| Mail Events | `ez-php/mail-events` | Mailgun/SendGrid/Postmark/SES delivery webhooks (bounces, complaints, opens, clicks) as events |
 | Media | `ez-php/media` | Image resizing and file processing via GD/Imagick |
 | Metrics | `ez-php/metrics` | Prometheus metrics endpoint — Counter, Gauge, Histogram |
 | Metrics OTLP | `ez-php/metrics-otlp` | OTLP/HTTP exporter for `ez-php/metrics` to an OpenTelemetry collector |

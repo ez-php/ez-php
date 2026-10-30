@@ -7,7 +7,7 @@ return [
     // in .env.example REDIS_PORT is the host-published port, while the probe
     // connects from inside the container.
     'redis' => [
-        'host' => getenv('HEALTH_REDIS_HOST') ?: '127.0.0.1',
+        'host' => getenv('HEALTH_REDIS_HOST') ?: '',
         'port' => (int) (getenv('HEALTH_REDIS_PORT') ?: 6379),
     ],
     'opcache' => [

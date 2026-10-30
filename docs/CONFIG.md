@@ -48,14 +48,27 @@ Read by the framework's `SecurityHeadersMiddleware` (register it with `$app->mid
 
 ## Optional Modules
 
-### Auth (JWT) — environment only
+### Auth (JWT) — `config/auth.php`
 
-`ez-php/auth`'s `JwtServiceProvider` reads these with `getenv()`; there is no `config/auth.php` key.
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    'jwt' => [
+        'secret' => getenv('JWT_SECRET') ?: '',
+        'ttl' => (int) (getenv('JWT_TTL') ?: 3600),
+    ],
+];
+```
+
+`ez-php/auth`'s `JwtServiceProvider` reads these keys through `ConfigInterface`. An unset or empty key falls back to the environment variable, so applications created before `config/auth.php` existed keep working unchanged.
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| — | `JWT_SECRET` | string | — | **Required** when `JwtManager` is resolved: HMAC signing key of at least 32 bytes (`JwtManager::MIN_SECRET_BYTES`), e.g. `bin2hex(random_bytes(32))`. A shorter or empty value makes resolving `JwtManager` throw `InvalidArgumentException` |
-| — | `JWT_TTL` | int | `3600` | Token lifetime in seconds |
+| `auth.jwt.secret` | `JWT_SECRET` | string | — | **Required** when `JwtManager` is resolved: HMAC signing key of at least 32 bytes (`JwtManager::MIN_SECRET_BYTES`), e.g. `bin2hex(random_bytes(32))`. A shorter or empty value makes resolving `JwtManager` throw `InvalidArgumentException` |
+| `auth.jwt.ttl` | `JWT_TTL` | int | `3600` | Token lifetime in seconds |
 
 ### Cache — `config/cache.php`
 
@@ -352,7 +365,7 @@ return [
     // in .env.example REDIS_PORT is the host-published port, while the probe
     // connects from inside the container.
     'redis' => [
-        'host' => getenv('HEALTH_REDIS_HOST') ?: '127.0.0.1',
+        'host' => getenv('HEALTH_REDIS_HOST') ?: '',
         'port' => (int) (getenv('HEALTH_REDIS_PORT') ?: 6379),
     ],
     'opcache' => [
@@ -376,7 +389,7 @@ return [
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `health.redis.host` | `HEALTH_REDIS_HOST` | string | `'127.0.0.1'` | Redis host for the Redis probe; probe is skipped if this key is absent. Previously read `REDIS_HOST`/`REDIS_PORT` — rename them in existing `.env` files; `REDIS_PORT` in the template is the host-published port, not the in-container one |
+| `health.redis.host` | `HEALTH_REDIS_HOST` | string | `''` | Redis host for the Redis probe; empty or absent = no Redis probe. Once set, the probe is always registered and reports `unhealthy` while Redis is unreachable (before 2.6.5 an unreachable Redis silently dropped the probe). Previously read `REDIS_HOST`/`REDIS_PORT` — rename them in existing `.env` files; `REDIS_PORT` in the template is the host-published port, not the in-container one |
 | `health.redis.port` | `HEALTH_REDIS_PORT` | int | `6379` | Redis port for the Redis probe (in-container port) |
 | `health.opcache.enabled` | `HEALTH_OPCACHE_ENABLED` | bool | `false` | Add the OPcache probe |
 | `health.disk.paths` | `HEALTH_DISK_PATHS` | list | `[]` | Paths whose filesystem free space is probed (env: comma-separated); one `DiskSpaceProbe` per path, none when empty |
@@ -395,6 +408,9 @@ return [
     'driver' => getenv('FLAGS_DRIVER') ?: 'file',
     'file' => getenv('FLAGS_FILE') ?: 'flags.php',
     'rollouts' => [],
+
+    // Seconds a flag answer is cached through ez-php/cache (CachedDriver); 0 = no cache.
+    'cache_ttl' => (int) (getenv('FLAGS_CACHE_TTL') ?: 0),
 ];
 ```
 
@@ -405,6 +421,7 @@ return [
 | `flags.redis.host` | `FLAGS_REDIS_HOST` | string | `'127.0.0.1'` | Redis host (redis driver only) |
 | `flags.redis.port` | `FLAGS_REDIS_PORT` | int | `6379` | Redis port |
 | `flags.redis.database` | `FLAGS_REDIS_DB` | int | `0` | Redis database index |
+| `flags.cache_ttl` | `FLAGS_CACHE_TTL` | int | `0` | Seconds flag answers are cached through `ez-php/cache` (`CachedDriver`, needs a bound `CacheInterface`); `0` = every check reads the store. Call `CachedDriver::forget()` after changing a flag to see it before the TTL runs out |
 | `flags.rollouts` | — | array | `[]` | Percentage rollouts, flag name => 0–100; `Flag::enabledFor()` enables a stable slice of contexts (crc32 bucket) and the value replaces the stored flag |
 
 The config key is `flags.driver`, not `flags.flags.driver`: the file's basename already supplies the `flags` namespace, so the array is flat.
@@ -664,6 +681,11 @@ Package: `ez-php/mail-events`
 | `mail_events.mailgun.path` | `MAIL_EVENTS_MAILGUN_PATH` | string | `'/webhooks/mail/mailgun'` | Route path; empty registers no route |
 | `mail_events.sendgrid.public_key` | `MAIL_EVENTS_SENDGRID_PUBLIC_KEY` | string | `''` | SendGrid Signed Event Webhook verification key (base64 as shown by SendGrid, or PEM); empty registers no SendGrid route |
 | `mail_events.sendgrid.path` | `MAIL_EVENTS_SENDGRID_PATH` | string | `'/webhooks/mail/sendgrid'` | Route path; empty registers no route |
+| `mail_events.postmark.username` | `MAIL_EVENTS_POSTMARK_USERNAME` | string | `''` | Basic-auth user you embed in the Postmark webhook URL (`https://user:pass@host/path`) |
+| `mail_events.postmark.password` | `MAIL_EVENTS_POSTMARK_PASSWORD` | string | `''` | Basic-auth password for that URL; empty registers no Postmark route |
+| `mail_events.postmark.path` | `MAIL_EVENTS_POSTMARK_PATH` | string | `'/webhooks/mail/postmark'` | Route path; empty registers no route |
+| `mail_events.ses.topic_arn` | `MAIL_EVENTS_SES_TOPIC_ARN` | string | `''` | ARN of the SNS topic the SES configuration set publishes to; messages from any other topic are rejected. Empty registers no SES route |
+| `mail_events.ses.path` | `MAIL_EVENTS_SES_PATH` | string | `'/webhooks/mail/ses'` | Route path (subscribe it to the SNS topic over HTTPS); empty registers no route |
 
 ---
 
@@ -814,6 +836,11 @@ MAIL_EVENTS_MAILGUN_SIGNING_KEY=
 MAIL_EVENTS_MAILGUN_PATH=/webhooks/mail/mailgun
 MAIL_EVENTS_SENDGRID_PUBLIC_KEY=
 MAIL_EVENTS_SENDGRID_PATH=/webhooks/mail/sendgrid
+MAIL_EVENTS_POSTMARK_USERNAME=
+MAIL_EVENTS_POSTMARK_PASSWORD=
+MAIL_EVENTS_POSTMARK_PATH=/webhooks/mail/postmark
+MAIL_EVENTS_SES_TOPIC_ARN=
+MAIL_EVENTS_SES_PATH=/webhooks/mail/ses
 
 # Queue (ez-php/queue)
 QUEUE_DRIVER=database
@@ -889,8 +916,8 @@ GCS_URL_EXPIRY=3600
 GCS_URL=
 GCS_ENDPOINT=
 
-# Health (ez-php/health) — own HEALTH_REDIS_HOST / HEALTH_REDIS_PORT (in-container, default 127.0.0.1:6379), not the host-published REDIS_PORT
-HEALTH_REDIS_HOST=127.0.0.1
+# Health (ez-php/health) — own HEALTH_REDIS_HOST / HEALTH_REDIS_PORT (in-container port), not the host-published REDIS_PORT; unset host = no Redis probe
+HEALTH_REDIS_HOST=redis
 HEALTH_REDIS_PORT=6379
 HEALTH_OPCACHE_ENABLED=false
 HEALTH_DISK_PATHS=
