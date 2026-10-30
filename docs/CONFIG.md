@@ -20,6 +20,7 @@ All config files live in `config/` and return plain PHP arrays. Values are read 
 | `app.locales` | — | list\|null | `null` | Locales `LocaleNegotiationMiddleware` may pick from `Accept-Language`; unset = `locale` plus the fallback chain |
 | `app.lang_path` | — | string | `<project>/lang` | Directory holding `<locale>/*.php` translation files |
 | `app.version` | `APP_VERSION` | string | `'1.0.0'` | Application version (used as the OpenAPI spec version) |
+| `app.url_signing_key` | `APP_URL_SIGNING_KEY` | string | `''` | Secret for `UrlSigner` signed links; resolving `UrlSigner` without it throws. Rotating it invalidates issued links |
 | — | `APP_ENV` | string | — | Deployment environment (`local`, `production`, …). Read from the process environment via `getenv()`, **not** from `config/app.php`. When it is `production`, `db:seed` and `db:setup` refuse to run without `--force`, and `ExceptionHandlerServiceProvider` passes it to `DefaultExceptionHandler`, which logs a warning when debug mode is on in production |
 
 > `APP_DEBUG` is also read directly from the environment by `ExceptionHandlerServiceProvider::boot()`: when true, `DebugToolbarMiddleware` is added to the global middleware stack.
@@ -43,6 +44,19 @@ Read by the framework's `SecurityHeadersMiddleware` (register it with `$app->mid
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
 | `security.headers` | — | array<string, string\|null> | `[]` | Overrides for the default security headers; `null` removes one, e.g. `'Content-Security-Policy' => "default-src 'self'"` |
+
+### Docker host ports — `docker-compose.yml`
+
+Read by Docker Compose only, not by any config file. Each sets the port published on the host; inside the Compose network, services keep their standard ports.
+
+| Env var | Default | Description |
+|---|---|---|
+| `APP_PORT` | `8001` | App (nginx) |
+| `DB_HOST_PORT` | `3308` | MySQL |
+| `REDIS_PORT` | `6383` | Redis; the app's own connections use `*_REDIS_PORT` (`6379`) |
+| `MAIL_WEB_PORT` | `8025` | Mailpit web UI |
+
+`MAIL_PORT` (see `mail.port`) also sets Mailpit's published SMTP port. `MEILISEARCH_PORT` (`7702`) applies only once the opt-in Meilisearch service is uncommented.
 
 ---
 
@@ -96,11 +110,11 @@ Package: `ez-php/mail`
 
 | Config key | Env var | Type | Default | Description |
 |---|---|---|---|---|
-| `mail.driver` | `MAIL_DRIVER` | string | `'null'` | Driver: `smtp`, `mailgun`, `sendgrid`, `log`, `null` |
+| `mail.driver` | `MAIL_DRIVER` | string | `'null'` | Driver: `smtp`, `mailgun`, `sendgrid`, `postmark`, `ses`, `log`, `null` |
 | `mail.from_address` | `MAIL_FROM_ADDRESS` | string | `''` | Default sender address (all drivers) |
 | `mail.from_name` | `MAIL_FROM_NAME` | string | `''` | Default sender display name (all drivers) |
 | `mail.log_path` | `MAIL_LOG_PATH` | string | `''` | Log file path (log driver only) |
-| `mail.timeout` | `MAIL_TIMEOUT` | int | `30` | Network timeout in seconds (smtp, mailgun, sendgrid); HTTP drivers also fail a connect after 10 s |
+| `mail.timeout` | `MAIL_TIMEOUT` | int | `30` | Network timeout in seconds (smtp, mailgun, sendgrid, postmark, ses); HTTP drivers also fail a connect after 10 s |
 
 **SMTP driver** (`MAIL_DRIVER=smtp`):
 
@@ -126,6 +140,20 @@ Package: `ez-php/mail`
 |---|---|---|---|---|
 | `mail.sendgrid_api_key` | `SENDGRID_API_KEY` | string | — | SendGrid v3 API key |
 | `mail.sendgrid_region` | `SENDGRID_REGION` | string | `'us'` | API region: `us` or `eu` (`api.eu.sendgrid.com`, EU data residency) |
+
+**Postmark driver** (`MAIL_DRIVER=postmark`) — add to `config/mail.php`:
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `mail.postmark_token` | `POSTMARK_TOKEN` | string | — | Postmark server token |
+
+**Amazon SES driver** (`MAIL_DRIVER=ses`) — add to `config/mail.php`:
+
+| Config key | Env var | Type | Default | Description |
+|---|---|---|---|---|
+| `mail.ses_key` | `SES_ACCESS_KEY_ID` | string | — | AWS access key id with `ses:SendEmail` |
+| `mail.ses_secret` | `SES_SECRET_ACCESS_KEY` | string | — | AWS secret access key |
+| `mail.ses_region` | `SES_REGION` | string | `'us-east-1'` | AWS region of the SES identity |
 
 ### Queue — `config/queue.php`
 
@@ -379,6 +407,8 @@ return [
         'degraded_percent' => (float) (getenv('HEALTH_DISK_DEGRADED_PERCENT') ?: 10),
         'unhealthy_percent' => (float) (getenv('HEALTH_DISK_UNHEALTHY_PERCENT') ?: 5),
     ],
+    // Route answering 200 without running a probe, for orchestrator liveness checks; empty = none.
+    'liveness_path' => getenv('HEALTH_LIVENESS_PATH') ?: '',
     // Raw exception messages of failing probes in the public /health JSON (PDO user/host,
     // internal URLs). Unset: follow app.debug; failing probes then read "Check failed".
     'expose_messages' => getenv('HEALTH_EXPOSE_MESSAGES') === false || getenv('HEALTH_EXPOSE_MESSAGES') === ''
@@ -395,6 +425,7 @@ return [
 | `health.disk.paths` | `HEALTH_DISK_PATHS` | list | `[]` | Paths whose filesystem free space is probed (env: comma-separated); one `DiskSpaceProbe` per path, none when empty |
 | `health.disk.degraded_percent` | `HEALTH_DISK_DEGRADED_PERCENT` | float | `10` | Free share (%) below which a disk probe reports DEGRADED |
 | `health.disk.unhealthy_percent` | `HEALTH_DISK_UNHEALTHY_PERCENT` | float | `5` | Free share (%) below which a disk probe reports UNHEALTHY |
+| `health.liveness_path` | `HEALTH_LIVENESS_PATH` | string | `''` | Path of a route answering 200 without running a probe, for liveness checks; empty = no route |
 | `health.expose_messages` | `HEALTH_EXPOSE_MESSAGES` | bool\|null | `null` (= `app.debug`) | Show failing probes' raw exception messages in the `/health` JSON; otherwise they read `Degraded` / `Check failed` |
 
 ### Feature Flags — `config/flags.php`
@@ -777,6 +808,13 @@ APP_DEBUG=false
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
 APP_VERSION=1.0.0
+APP_URL_SIGNING_KEY=
+
+# Docker host ports
+APP_PORT=8001
+DB_HOST_PORT=3308
+REDIS_PORT=6383
+MAIL_WEB_PORT=8025
 
 # Database
 DB_DRIVER=mysql
@@ -829,6 +867,12 @@ MAILGUN_REGION=us
 # SendGrid (MAIL_DRIVER=sendgrid)
 SENDGRID_API_KEY=
 SENDGRID_REGION=us
+# Postmark (MAIL_DRIVER=postmark)
+POSTMARK_TOKEN=
+# Amazon SES (MAIL_DRIVER=ses)
+SES_ACCESS_KEY_ID=
+SES_SECRET_ACCESS_KEY=
+SES_REGION=us-east-1
 
 # Mail Events (ez-php/mail-events)
 MAIL_EVENTS_TOLERANCE=300
@@ -923,6 +967,7 @@ HEALTH_OPCACHE_ENABLED=false
 HEALTH_DISK_PATHS=
 HEALTH_DISK_DEGRADED_PERCENT=10
 HEALTH_DISK_UNHEALTHY_PERCENT=5
+HEALTH_LIVENESS_PATH=
 
 # Feature Flags (ez-php/feature-flags)
 FLAGS_DRIVER=file

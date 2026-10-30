@@ -21,6 +21,8 @@ return [
         'degraded_percent' => (float) (getenv('HEALTH_DISK_DEGRADED_PERCENT') ?: 10),
         'unhealthy_percent' => (float) (getenv('HEALTH_DISK_UNHEALTHY_PERCENT') ?: 5),
     ],
+    // Route answering 200 without running a probe, for orchestrator liveness checks; empty = none.
+    'liveness_path' => getenv('HEALTH_LIVENESS_PATH') ?: '',
     // Raw exception messages of failing probes in the public /health JSON (PDO user/host,
     // internal URLs). Unset: follow app.debug; failing probes then read "Check failed".
     'expose_messages' => getenv('HEALTH_EXPOSE_MESSAGES') === false || getenv('HEALTH_EXPOSE_MESSAGES') === ''

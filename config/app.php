@@ -14,5 +14,7 @@ return [
     'locales' => null,
     // Spec version reported by ez-php/openapi.
     'version' => getenv('APP_VERSION') ?: '1.0.0',
+    // Key for signed links (UrlSigner, SignedUrlMiddleware); required only when you use them.
+    'url_signing_key' => getenv('APP_URL_SIGNING_KEY') ?: '',
     'lang_path' => dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lang',
 ];

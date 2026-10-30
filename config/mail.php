@@ -12,7 +12,7 @@ return [
     'from_address' => getenv('MAIL_FROM_ADDRESS') ?: '',
     'from_name' => getenv('MAIL_FROM_NAME') ?: '',
     'log_path' => getenv('MAIL_LOG_PATH') ?: '',
-    // Network timeout in seconds for smtp, mailgun and sendgrid
+    // Network timeout in seconds for smtp, mailgun, sendgrid, postmark and ses
     'timeout' => (int) (getenv('MAIL_TIMEOUT') ?: 30),
     // driver = mailgun
     'mailgun_domain' => getenv('MAILGUN_DOMAIN') ?: '',
@@ -22,4 +22,10 @@ return [
     'sendgrid_api_key' => getenv('SENDGRID_API_KEY') ?: '',
     // 'us' or 'eu' (accounts with EU data residency)
     'sendgrid_region' => getenv('SENDGRID_REGION') ?: 'us',
+    // driver = postmark
+    'postmark_token' => getenv('POSTMARK_TOKEN') ?: '',
+    // driver = ses
+    'ses_key' => getenv('SES_ACCESS_KEY_ID') ?: '',
+    'ses_secret' => getenv('SES_SECRET_ACCESS_KEY') ?: '',
+    'ses_region' => getenv('SES_REGION') ?: 'us-east-1',
 ];
